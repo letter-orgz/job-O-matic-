@@ -36,7 +36,7 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["Dashboard", "Job Search", "Applications", "Settings", "Help"]
+        ["Dashboard", "Job Search", "Applications", "PR Status", "Settings", "Help"]
     )
     
     # Main content based on page selection
@@ -46,6 +46,8 @@ def main():
         show_job_search()
     elif page == "Applications":
         show_applications()
+    elif page == "PR Status":
+        show_pr_status()
     elif page == "Settings":
         show_settings()
     elif page == "Help":
@@ -188,6 +190,157 @@ def show_settings():
     if st.button("💾 Save Settings"):
         st.success("✅ Settings saved successfully!")
 
+def show_pr_status():
+    """Display PR merge readiness status"""
+    st.header("🔍 Pull Request Status")
+    st.subheader("Check which PRs are ready to merge")
+    
+    # Information section
+    st.info("📋 This page helps you monitor which pull requests are ready to be merged into the main branch.")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown("""
+        **What we check:**
+        - ✅ Draft status (PRs marked as draft are not ready)
+        - 🔄 Merge conflicts (must be resolved)
+        - 👥 Review approvals (required before merge)
+        - 🔍 CI checks (all automated tests must pass)
+        - 🛡️ Branch protection compliance
+        """)
+    
+    with col2:
+        # Quick actions
+        if st.button("🔄 Check PR Status", type="primary"):
+            with st.spinner("Checking PR status..."):
+                check_pr_status_live()
+        
+        if st.button("📖 View Documentation"):
+            st.markdown("See [PR Merge Checker Documentation](docs/PR_MERGE_CHECKER.md)")
+    
+    # Manual run options
+    st.subheader("🛠️ Manual Tools")
+    
+    with st.expander("🖥️ Command Line Tools"):
+        st.code("""
+# Quick check with GitHub CLI
+./scripts/check-prs.sh
+
+# Detailed Python analysis
+python3 scripts/check-pr-merge-readiness.py
+
+# Shell wrapper
+./scripts/check-pr-readiness.sh
+        """, language="bash")
+    
+    with st.expander("📊 Latest Report"):
+        show_latest_pr_report()
+
+def check_pr_status_live():
+    """Run PR status check and display results"""
+    import subprocess
+    import os
+    
+    try:
+        # Try to run the PR checker script
+        result = subprocess.run(
+            ["python3", "scripts/check-pr-merge-readiness.py"],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            st.success("✅ PR check completed successfully!")
+            
+            # Display output
+            if result.stdout:
+                st.text_area("Output:", result.stdout, height=300)
+            
+            # Try to show latest report
+            show_latest_pr_report()
+        else:
+            st.error(f"❌ PR check failed with exit code {result.returncode}")
+            if result.stderr:
+                st.error(f"Error: {result.stderr}")
+                
+            # Suggest alternatives
+            st.markdown("""
+            **Alternative options:**
+            - Use GitHub CLI: `gh pr list --repo letter-orgz/job-O-matic-`
+            - Visit the web interface: https://github.com/letter-orgz/job-O-matic-/pulls
+            - Set up GitHub token authentication
+            """)
+    
+    except subprocess.TimeoutExpired:
+        st.error("⏰ Check timed out. This might be due to network issues or rate limiting.")
+    except FileNotFoundError:
+        st.error("❌ Python script not found. Please ensure the scripts are properly installed.")
+    except Exception as e:
+        st.error(f"❌ Unexpected error: {str(e)}")
+
+def show_latest_pr_report():
+    """Display the latest PR report if available"""
+    reports_dir = Path("reports")
+    
+    if not reports_dir.exists():
+        st.info("📝 No reports directory found. Run a PR check to generate reports.")
+        return
+    
+    # Find latest report file
+    report_files = list(reports_dir.glob("pr-merge-readiness-*.json"))
+    
+    if not report_files:
+        st.info("📝 No PR reports found. Run a check to generate one.")
+        return
+    
+    # Get the most recent report
+    latest_report = max(report_files, key=lambda f: f.stat().st_mtime)
+    
+    try:
+        import json
+        with open(latest_report, 'r') as f:
+            report_data = json.load(f)
+        
+        st.success(f"📊 Latest report: {latest_report.name}")
+        
+        # Display summary
+        summary = report_data.get("summary", {})
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total PRs", summary.get("total_prs", 0))
+        with col2:
+            st.metric("Ready to Merge", summary.get("ready_count", 0), 
+                     delta=None, delta_color="normal")
+        with col3:
+            st.metric("Need Attention", summary.get("needs_attention_count", 0),
+                     delta=None, delta_color="inverse")
+        
+        # Show ready PRs
+        ready_prs = report_data.get("ready_to_merge", [])
+        if ready_prs:
+            st.subheader("✅ Ready to Merge")
+            for pr in ready_prs:
+                st.success(f"PR #{pr['pr_number']}: {pr['title']} (by {pr['author']})")
+        
+        # Show PRs needing attention
+        needs_attention = report_data.get("needs_attention", [])
+        if needs_attention:
+            st.subheader("⚠️ Needs Attention")
+            for pr in needs_attention:
+                with st.expander(f"PR #{pr['pr_number']}: {pr['title']}"):
+                    st.write(f"**Author:** {pr['author']}")
+                    st.write(f"**Updated:** {pr['updated_at']}")
+                    if pr.get('blocking_factors'):
+                        st.write("**Blocking factors:**")
+                        for factor in pr['blocking_factors']:
+                            st.write(f"• {factor}")
+    
+    except Exception as e:
+        st.error(f"❌ Error reading report: {str(e)}")
+
 def show_help():
     """Display help and documentation"""
     st.header("❓ Help & Documentation")
@@ -230,7 +383,8 @@ def show_help():
         ("README.md", "Main project documentation"),
         ("compliance_best_practices.md", "Legal and ethical guidelines"),
         ("implementation-guide.md", "Technical implementation details"),
-        ("config_template.env", "Environment configuration template")
+        ("config_template.env", "Environment configuration template"),
+        ("docs/PR_MERGE_CHECKER.md", "PR merge readiness checker guide")
     ]
     
     for doc_file, description in docs:
