@@ -1,6 +1,10 @@
 # job-O-matic-
 we gonna get this bread
 
+## ⚠️ Important: Codespace Billing Notice
+
+**If you are being charged personally for Codespaces from this repository, please read [.github/CODESPACES_BILLING.md](.github/CODESPACES_BILLING.md) for instructions on how to ensure billing goes to the letter-orgz organization instead.**
+
 ## 🚀 Getting Started with Codespaces
 
 This repository is configured with GitHub Codespaces for easy development setup.
@@ -8,10 +12,13 @@ This repository is configured with GitHub Codespaces for easy development setup.
 ### Option 1: Use GitHub Codespaces (Recommended)
 1. Click the green "Code" button
 2. Select "Codespaces" tab
-3. Click "Create codespace on main"
-4. Wait for the environment to set up automatically
-5. Once setup is complete, run: `./start.sh` or `streamlit run app.py`
-6. The application will be available on port 8501
+3. **IMPORTANT**: Before clicking "Create codespace", verify that billing shows "letter-orgz" not your personal account
+4. Click "Create codespace on main"
+5. Wait for the environment to set up automatically
+6. Once setup is complete, run: `./start.sh` or `streamlit run app.py`
+7. The application will be available on port 8501
+
+**💡 Billing Tip**: If you see your personal account name in the billing section, see [Codespace Billing Guide](.github/CODESPACES_BILLING.md) before proceeding.
 
 ### Option 2: Local Development
 1. Clone this repository
@@ -25,6 +32,7 @@ The Codespace will automatically:
 - Forward port 8501 for Streamlit
 - Configure VS Code with Python extensions
 - Create necessary directory structure
+- Display billing attribution information
 
 ## 📁 Directory Structure
 

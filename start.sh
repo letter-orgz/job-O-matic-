@@ -10,6 +10,16 @@ if [ ! -f "app.py" ]; then
     exit 1
 fi
 
+# Display billing information if in Codespace
+if [ "$CODESPACES" = "true" ]; then
+    echo ""
+    echo "💳 Codespace Billing Information:"
+    echo "  Repository: letter-orgz/job-O-matic-"
+    echo "  This Codespace should be billed to letter-orgz organization"
+    echo "  If you see personal charges, run: ./check-billing.sh"
+    echo ""
+fi
+
 # Check if Python is available
 if ! command -v python3 &> /dev/null; then
     echo "❌ Error: python3 not found"
