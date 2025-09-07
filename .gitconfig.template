@@ -1,0 +1,52 @@
+# Job-O-Matic Git Configuration Template
+# This file provides a template for git configuration
+# The actual configuration is applied by .devcontainer/setup.sh
+
+[alias]
+    # Basic shortcuts
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    visual = !gitk
+
+    # Daily workflow aliases
+    daily-branch = !f() { DATE=$(date +%Y-%m-%d); git checkout -b daily/$DATE 2>/dev/null || git checkout daily/$DATE; }; f
+    daily-push = !f() { BRANCH=$(git rev-parse --abbrev-ref HEAD); git push -u origin $BRANCH; }; f
+    daily-clean = !f() { git checkout main 2>/dev/null || git checkout master 2>/dev/null; git branch | grep "daily/" | head -10 | xargs -r git branch -d; }; f
+
+    # Branch management
+    new-feature = !f() { git checkout -b feature/$1; }; f
+    new-fix = !f() { git checkout -b fix/$1; }; f
+    recent-branches = for-each-ref --sort=-committerdate refs/heads/ --format="%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))"
+
+    # Safety commands
+    save = !git add -A && git commit -m "WIP: Save current work"
+    undo = reset HEAD~1 --mixed
+    wipe = !git add -A && git commit -qm "WIPE SAVEPOINT" && git reset HEAD~1 --hard
+
+    # Enhanced logging
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    lga = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all
+
+[core]
+    autocrlf = input
+    safecrlf = true
+    editor = code --wait
+
+[pull]
+    rebase = false
+
+[init]
+    defaultBranch = main
+
+[push]
+    default = current
+
+[branch]
+    autosetuprebase = always
+
+[help]
+    autocorrect = 1

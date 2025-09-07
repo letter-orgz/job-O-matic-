@@ -14,22 +14,34 @@
                 "ms-python.autopep8",
                 "ms-python.pylint",
                 "ms-toolsai.jupyter",
-                "charliermarsh.ruff"
+                "charliermarsh.ruff",
+                "eamodio.gitlens",
+                "github.vscode-pull-request-github",
+                "mhutchie.git-graph",
+                "donjayamanne.githistory",
+                "github.vscode-github-actions"
             ],
             "settings": {
                 "python.defaultInterpreterPath": "/usr/local/bin/python",
                 "python.linting.enabled": true,
                 "python.linting.pylintEnabled": true,
                 "python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
-                "python.formatting.provider": "autopep8"
+                "python.formatting.provider": "autopep8",
+                "git.enableSmartCommit": true,
+                "git.autofetch": true,
+                "git.confirmSync": false,
+                "gitlens.defaultDateFormat": "MMMM Do, YYYY h:mma",
+                "gitlens.defaultDateShortFormat": "MMM D, YYYY",
+                "gitlens.showWelcomeOnInstall": false,
+                "gitlens.showWhatsNewAfterUpgrades": false
             }
         }
     },
 
     "onCreateCommand": "pip install --upgrade pip",
-    "postCreateCommand": "pip install -r requirements.txt && echo '✅ Job-O-Matic setup complete! Use: ./start.sh or streamlit run app.py' && echo '📋 This Codespace should be billed to letter-orgz organization.' && echo '📖 See .github/CODESPACES_BILLING.md for billing info.'",
+    "postCreateCommand": "pip install -r requirements.txt && ./.devcontainer/setup.sh && echo '✅ Job-O-Matic setup complete! Use: ./start.sh or streamlit run app.py' && echo '📋 This Codespace should be billed to letter-orgz organization.' && echo '📖 See .github/CODESPACES_BILLING.md for billing info.' && echo '🔧 Git workflow configured! See .devcontainer/git-workflow-cheatsheet.md for commands.'",
     
-    "postStartCommand": "echo '🎯 Job-O-Matic is ready! Run ./start.sh to launch the application.' && echo '⚠️  If you see personal billing charges, check .github/CODESPACES_BILLING.md'",
+    "postStartCommand": "echo '🎯 Job-O-Matic is ready! Run ./start.sh to launch the application.' && echo '⚠️  If you see personal billing charges, check .github/CODESPACES_BILLING.md' && echo '🚀 Quick git workflow: git daily-branch or ./.devcontainer/scripts/daily-workflow.sh start'",
     
     "forwardPorts": [8501],
     "portsAttributes": {
@@ -45,6 +57,7 @@
     "containerEnv": {
         "GITHUB_ORG": "letter-orgz",
         "REPO_NAME": "job-O-matic-",
-        "BILLING_INFO": "This Codespace should be billed to letter-orgz organization"
+        "BILLING_INFO": "This Codespace should be billed to letter-orgz organization",
+        "GIT_WORKFLOW_ENABLED": "true"
     }
 }
