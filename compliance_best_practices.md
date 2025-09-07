@@ -33,7 +33,7 @@ def rate_limit(calls_per_second=0.5):
     """Decorator to enforce rate limiting"""
     min_interval = 1.0 / calls_per_second
     last_called = [0.0]
-
+    
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -60,18 +60,18 @@ from urllib3.util.retry import Retry
 
 def create_resilient_session():
     session = requests.Session()
-
+    
     retry_strategy = Retry(
         total=3,
         status_forcelist=[429, 500, 502, 503, 504],
         method_whitelist=["HEAD", "GET", "POST"],
         backoff_factor=2
     )
-
+    
     adapter = HTTPAdapter(max_retries=retry_strategy)
     session.mount("http://", adapter)
     session.mount("https://", adapter)
-
+    
     return session
 ```
 
