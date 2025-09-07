@@ -1,14 +1,16 @@
-
 # Load environment variables from .env if present
 import os
+
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass  # dotenv not installed, skip
 # import requests  # Uncomment when implementing real API calls
 try:
     import requests
+
     _REQUESTS_AVAILABLE = True
 except Exception:
     requests = None
@@ -16,7 +18,9 @@ except Exception:
 
 API_KEY = os.getenv("PERPLEXITY_API_KEY", "")
 ENABLED = os.getenv("ENABLE_PERPLEXITY", "false").lower() in ("1", "true", "yes")
-PERPLEXITY_API_URL = os.getenv("PERPLEXITY_API_URL", "")  # set to real endpoint when available
+PERPLEXITY_API_URL = os.getenv(
+    "PERPLEXITY_API_URL", ""
+)  # set to real endpoint when available
 
 
 def build_perplexity_prompt(profile: dict, filters: dict, limit: int = 30) -> str:
@@ -29,7 +33,9 @@ def build_perplexity_prompt(profile: dict, filters: dict, limit: int = 30) -> st
     skills_must = ", ".join(profile.get("skills", [])) or ""
     skills_pref = ", ".join(filters.get("nice_to_have", [])) or ""
     location = filters.get("location", "remote")
-    remote_clause = "remote allowed" if filters.get("remote", True) else f"in {location}"
+    remote_clause = (
+        "remote allowed" if filters.get("remote", True) else f"in {location}"
+    )
     auth = profile.get("work_authorization", "open to sponsorship")
     exclude = ""
     if filters.get("exclude_companies"):
@@ -56,17 +62,27 @@ def build_omar_prompt(
     include_random_online=True,
 ) -> str:
     roles = [
-        "legal assistant","paralegal","legal researcher",
-        "contract analyst","compliance analyst","regulatory analyst",
-        "privacy","GDPR","legal ops","policy officer","legal technologist","public sector legal"
+        "legal assistant",
+        "paralegal",
+        "legal researcher",
+        "contract analyst",
+        "compliance analyst",
+        "regulatory analyst",
+        "privacy",
+        "GDPR",
+        "legal ops",
+        "policy officer",
+        "legal technologist",
+        "public sector legal",
     ]
     if roles_extra:
         roles.extend(roles_extra)
 
     random_block = (
-        '• Also OK: (“research assistant” OR “online tutor law/government” OR “transcription” '
-        'OR “content moderator” OR “legal content writer”)'
-        if include_random_online else ""
+        "• Also OK: (“research assistant” OR “online tutor law/government” OR “transcription” "
+        "OR “content moderator” OR “legal content writer”)"
+        if include_random_online
+        else ""
     )
 
     return f"""
@@ -105,6 +121,7 @@ RETURN FORMAT (JSON only)
 Output ONLY the JSON.
 """.strip()
 
+
 def search_perplexity(prompt, dry_run=True):
     """
     Search Perplexity API with the given prompt.
@@ -118,19 +135,29 @@ def search_perplexity(prompt, dry_run=True):
 
     # Real API call (only when enabled and dry_run is False)
     if not PERPLEXITY_API_URL:
-        print("[NOT IMPLEMENTED] No PERPLEXITY_API_URL set; cannot perform real API call.")
+        print(
+            "[NOT IMPLEMENTED] No PERPLEXITY_API_URL set; cannot perform real API call."
+        )
         return []
 
     if not _REQUESTS_AVAILABLE:
-        print("Requests package not available in this environment; install 'requests' to enable live calls.")
+        print(
+            "Requests package not available in this environment; install 'requests' to enable live calls."
+        )
         return []
 
     # Perform the HTTP request and return parsed JSON
     try:
         import requests as _requests
-        headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+
+        headers = {
+            "Authorization": f"Bearer {API_KEY}",
+            "Content-Type": "application/json",
+        }
         payload = {"query": prompt, "format": "json"}
-        resp = _requests.post(PERPLEXITY_API_URL, headers=headers, json=payload, timeout=30)
+        resp = _requests.post(
+            PERPLEXITY_API_URL, headers=headers, json=payload, timeout=30
+        )
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
@@ -148,7 +175,11 @@ def normalize_perplexity_results(raw_results) -> list:
     if not raw_results:
         return jobs
     # If raw_results is a dict with 'results' key, try to extract
-    items = raw_results if isinstance(raw_results, list) else raw_results.get("results") or raw_results
+    items = (
+        raw_results
+        if isinstance(raw_results, list)
+        else raw_results.get("results") or raw_results
+    )
     if not isinstance(items, list):
         return jobs
     for idx, it in enumerate(items, start=1):
@@ -203,7 +234,11 @@ def insert_jobs_into_db(jobs: list):
             # try to find existing by apply_url
             existing = None
             if j.get("apply_url"):
-                existing = sess.query(Job).filter(Job.apply_url == j.get("apply_url")).one_or_none()
+                existing = (
+                    sess.query(Job)
+                    .filter(Job.apply_url == j.get("apply_url"))
+                    .one_or_none()
+                )
             if existing:
                 # update fields
                 existing.title = j.get("title") or existing.title
@@ -231,6 +266,7 @@ def insert_jobs_into_db(jobs: list):
         sess.close()
 
     return inserted
+
 
 if __name__ == "__main__":
     # Example usage: dry run

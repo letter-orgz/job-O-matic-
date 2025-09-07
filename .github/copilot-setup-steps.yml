@@ -1,0 +1,89 @@
+name: Setup Job-O-Matic Development Environment
+on: [workflow_dispatch]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Create cache key
+        id: cache-key
+        run: echo "key=pip-${{ hashFiles('requirements.txt') }}" >> $GITHUB_OUTPUT
+        
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            pip-
+            
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3 libsqlite3-dev
+          
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Create data directories
+        run: |
+          mkdir -p data/cv
+          mkdir -p data/templates
+          mkdir -p exports
+          mkdir -p outputs
+          mkdir -p db
+          
+      - name: Initialize database
+        run: |
+          python -c "
+          from src.db import engine, Session
+          from src.models import Base
+          Base.metadata.create_all(bind=engine)
+          print('Database initialized successfully')
+          "
+          
+      - name: Create sample configuration
+        run: |
+          cp config_template.env .env.example
+          echo "Sample configuration created at .env.example"
+          
+      - name: Verify installation
+        run: |
+          python -c "import app; print('✅ App imports successfully')"
+          python -c "from src import models, db; print('✅ Core modules import successfully')"
+          python -c "import streamlit; print(f'✅ Streamlit version: {streamlit.__version__}')"
+          
+      - name: Run basic tests
+        run: |
+          python -m pytest --version
+          echo "✅ Testing framework ready"
+          
+      - name: Display setup summary
+        run: |
+          echo "🎯 Job-O-Matic Development Environment Ready!"
+          echo "📁 Directories created:"
+          echo "   - data/cv/ (place your CV files here)"
+          echo "   - data/templates/ (email templates)"
+          echo "   - exports/ (generated exports)"
+          echo "   - outputs/ (application bundles)"
+          echo "   - db/ (SQLite database)"
+          echo ""
+          echo "🚀 To start development:"
+          echo "   1. Copy .env.example to .env and configure your API keys"
+          echo "   2. Place CV files in data/cv/ directory"
+          echo "   3. Run: streamlit run app.py"
+          echo ""
+          echo "📚 Key files to review:"
+          echo "   - .github/copilot-instructions.md (Copilot guidance)"
+          echo "   - compliance_best_practices.md (legal guidelines)"
+          echo "   - implementation-guide.md (feature documentation)"
