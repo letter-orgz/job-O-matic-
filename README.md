@@ -50,7 +50,19 @@ job-O-matic/
 
 ## 🆘 Troubleshooting
 
-If you encounter "Codespace access limited" errors:
+### Common Issues
+
+**If you encounter "No such file or directory" when running `./start.sh`:**
+- Make sure you're in the job-O-matic root directory (where `app.py` exists)
+- Verify the script has execute permissions: `chmod +x start.sh`
+- The enhanced start.sh script will now automatically install missing dependencies
+
+**If you encounter "Codespace access limited" errors:**
 - Refresh the Codespace
 - Check if the container built successfully
 - Run `./start.sh` manually if the app doesn't auto-start
+
+**If you encounter dependency issues:**
+- The start.sh script will automatically install dependencies from requirements.txt
+- You can also manually install: `pip3 install -r requirements.txt`
+- Ensure you have Python 3.11+ installed
