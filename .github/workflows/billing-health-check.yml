@@ -1,0 +1,110 @@
+name: Check Organization Billing Setup
+
+on:
+  schedule:
+    # Run every day at 9 AM UTC to check for billing issues
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of billing check to perform'
+        required: true
+        default: 'basic'
+        type: choice
+        options:
+        - 'basic'
+        - 'detailed'
+
+jobs:
+  billing-health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Basic Billing Health Check
+        if: github.event.inputs.check_type == 'basic' || github.event_name == 'schedule'
+        run: |
+          echo "🏢 Daily Organization Billing Health Check"
+          echo "========================================="
+          echo ""
+          echo "Repository: letter-orgz/job-O-matic-"
+          echo "Check Date: $(date)"
+          echo ""
+          echo "📋 Reminder for Organization Admins:"
+          echo ""
+          echo "If v4mpire77 is still experiencing billing issues:"
+          echo "  1. Run: ./admin-billing-check.sh"
+          echo "  2. Follow: .github/ADMIN_ACTION_ITEMS.md"
+          echo "  3. Update issue status when resolved"
+          echo ""
+          echo "📊 Key Settings to Verify:"
+          echo "  • Organization Codespaces enabled"
+          echo "  • Spending limits configured"
+          echo "  • User access permissions correct"
+          echo ""
+          echo "📞 If issues persist:"
+          echo "  • Review .github/ISSUE_RESOLUTION_SUMMARY.md"
+          echo "  • Contact GitHub Support if needed"
+          echo ""
+          echo "========================================="
+          
+      - name: Detailed Billing Check
+        if: github.event.inputs.check_type == 'detailed'
+        run: |
+          echo "🔍 Detailed Organization Billing Analysis"
+          echo "========================================"
+          echo ""
+          echo "Repository: letter-orgz/job-O-matic-"
+          echo "Analysis Date: $(date)"
+          echo ""
+          echo "📋 Configuration Files Status:"
+          
+          if [ -f ".github/BILLING_RESOLUTION_GUIDE.md" ]; then
+            echo "  ✅ Billing resolution guide exists"
+          else
+            echo "  ❌ Missing billing resolution guide"
+          fi
+          
+          if [ -f "admin-billing-check.sh" ]; then
+            echo "  ✅ Admin billing check script exists"
+          else
+            echo "  ❌ Missing admin billing check script"
+          fi
+          
+          if [ -f "check-billing.sh" ]; then
+            echo "  ✅ User billing check script exists"
+          else
+            echo "  ❌ Missing user billing check script"
+          fi
+          
+          if [ -f ".github/ADMIN_ACTION_ITEMS.md" ]; then
+            echo "  ✅ Admin action items documented"
+          else
+            echo "  ❌ Missing admin action items"
+          fi
+          
+          echo ""
+          echo "📊 DevContainer Configuration:"
+          if grep -q "letter-orgz" .devcontainer/devcontainer.json; then
+            echo "  ✅ Organization context configured"
+          else
+            echo "  ❌ Organization context not found"
+          fi
+          
+          echo ""
+          echo "📝 README Billing Warning:"
+          if grep -q "v4mpire77" README.md; then
+            echo "  ✅ Specific billing issue documented in README"
+          else
+            echo "  ⚠️  General billing warning only"
+          fi
+          
+          echo ""
+          echo "🔧 Available Tools:"
+          echo "  • Admin setup verification: ./admin-billing-check.sh"
+          echo "  • User billing check: ./check-billing.sh"
+          echo "  • Resolution guide: .github/BILLING_RESOLUTION_GUIDE.md"
+          echo "  • Issue summary: .github/ISSUE_RESOLUTION_SUMMARY.md"
+          echo ""
+          echo "========================================"
