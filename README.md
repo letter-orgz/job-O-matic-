@@ -3,7 +3,13 @@ we gonna get this bread
 
 ## ⚠️ Important: Codespace Billing Notice
 
-**If you are being charged personally for Codespaces from this repository, please read [.github/CODESPACES_BILLING.md](.github/CODESPACES_BILLING.md) for instructions on how to ensure billing goes to the letter-orgz organization instead.**
+**🚨 Current Issue: User v4mpire77 is being charged personally instead of organization billing.**
+
+**If you are being charged personally for Codespaces from this repository:**
+- 📖 **Immediate fix**: See [.github/BILLING_RESOLUTION_GUIDE.md](.github/BILLING_RESOLUTION_GUIDE.md)
+- 📖 **Detailed guide**: [.github/CODESPACES_BILLING.md](.github/CODESPACES_BILLING.md)
+- 🛑 **Stop creating Codespaces** until billing is properly configured
+- 📧 **Contact**: @letter-orgz/admins for organization setup
 
 ## 🚀 Getting Started with Codespaces
 
@@ -18,7 +24,7 @@ This repository is configured with GitHub Codespaces for easy development setup.
 6. Once setup is complete, run: `./start.sh` or `streamlit run app.py`
 7. The application will be available on port 8501
 
-**💡 Billing Tip**: If you see your personal account name in the billing section, see [Codespace Billing Guide](.github/CODESPACES_BILLING.md) before proceeding.
+**💡 Billing Tip**: If you see your personal account name in the billing section, STOP and see [Billing Resolution Guide](.github/BILLING_RESOLUTION_GUIDE.md) before proceeding.
 
 ### Option 2: Local Development
 1. Clone this repository
