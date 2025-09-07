@@ -40,12 +40,42 @@ The Codespace will automatically:
 - Create necessary directory structure
 - Display billing attribution information
 
+## 🌿 Daily Branch Management
+
+This repository includes an automated daily branch management system to keep the main codebase clean and provide structured development workflows.
+
+### Quick Start
+```bash
+# Start of day - full workflow
+./scripts/branch-mgmt.sh start feature-name
+
+# End of day - merge completed work
+./scripts/branch-mgmt.sh merge
+
+# Check current status
+./scripts/branch-mgmt.sh status
+```
+
+### Features
+- **Consistent naming**: Creates branches like `feat/2025-09-07-feature-name`
+- **Automated cleanup**: Archives old branches automatically
+- **Safety checks**: Prevents uncommitted changes and secret commits
+- **Protected main**: Enforces clean merge practices
+
+📖 **Full documentation**: [docs/BRANCH_MANAGEMENT.md](docs/BRANCH_MANAGEMENT.md)
+
 ## 📁 Directory Structure
 
 ```
 job-O-matic/
 ├── app.py                    # Main Streamlit application
 ├── start.sh                  # Startup script
+├── scripts/                  # Branch management scripts
+│   ├── branch-mgmt.sh        # Main CLI for branch management
+│   ├── daily-branch-*.sh     # Individual workflow scripts
+│   └── install-hooks.sh      # Git hooks installer
+├── docs/                     # Documentation
+│   └── BRANCH_MANAGEMENT.md  # Branch workflow guide
 ├── data/                     # User data (gitignored)
 │   ├── cv/                   # CV files
 │   └── templates/            # Email templates
@@ -57,10 +87,17 @@ job-O-matic/
 
 ## 🔧 Usage
 
+### Application Usage
 1. **First time setup**: The app will create necessary directories
 2. **Add CV files**: Place your CV variants in `data/cv/`
 3. **Configure settings**: Use the Settings page for API keys
 4. **Start applying**: Use Job Search and Applications features
+
+### Development Workflow
+1. **Start of day**: `./scripts/branch-mgmt.sh start feature-description`
+2. **Work normally**: Make commits, push changes as usual
+3. **End of day**: `./scripts/branch-mgmt.sh merge`
+4. **Check status**: `./scripts/branch-mgmt.sh status` anytime
 
 ## 🆘 Troubleshooting
 

@@ -1,0 +1,164 @@
+name: Branch Protection and Management
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  branch-protection-info:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Display Branch Protection Information
+        run: |
+          echo "==============================================="
+          echo "Job-O-Matic Branch Protection Guidelines"
+          echo "==============================================="
+          echo ""
+          echo "📋 Recommended Branch Protection Rules for 'main':"
+          echo ""
+          echo "✅ Require pull request reviews before merging"
+          echo "   - Require at least 1 review"
+          echo "   - Dismiss stale reviews when new commits are pushed"
+          echo ""
+          echo "✅ Require status checks to pass before merging"
+          echo "   - Require branches to be up to date before merging"
+          echo ""
+          echo "✅ Require branches to be up to date before merging"
+          echo ""
+          echo "✅ Include administrators in these restrictions"
+          echo ""
+          echo "🔒 Additional Security Measures:"
+          echo "   - Restrict pushes that create files matching *.env, *.key, secrets/*"
+          echo "   - Require signed commits (optional but recommended)"
+          echo ""
+          echo "⚙️  To configure these settings:"
+          echo "   1. Go to: https://github.com/${{ github.repository }}/settings/branches"
+          echo "   2. Click 'Add rule' for branch 'main'"
+          echo "   3. Enable the recommended settings above"
+          echo ""
+          echo "📖 For detailed instructions, see:"
+          echo "   docs/BRANCH_MANAGEMENT.md"
+          echo ""
+          echo "==============================================="
+
+  validate-daily-branch:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate Daily Branch Naming
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          
+          # Check if this is a daily branch
+          if [[ "$BRANCH_NAME" =~ ^(feat|fix|hotfix)/[0-9]{4}-[0-9]{2}-[0-9]{2}-.+ ]]; then
+            echo "✅ Valid daily branch name: $BRANCH_NAME"
+            
+            # Extract date from branch name
+            BRANCH_DATE=$(echo "$BRANCH_NAME" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+            CURRENT_DATE=$(date +%Y-%m-%d)
+            
+            # Check if branch is from today or recent (within 7 days)
+            if [[ "$BRANCH_DATE" == "$CURRENT_DATE" ]]; then
+              echo "✅ Branch is from today: $BRANCH_DATE"
+            else
+              DAYS_OLD=$(( ($(date -d "$CURRENT_DATE" +%s) - $(date -d "$BRANCH_DATE" +%s)) / 86400 ))
+              if [[ $DAYS_OLD -le 7 ]]; then
+                echo "✅ Branch is recent ($DAYS_OLD days old): $BRANCH_DATE"
+              else
+                echo "⚠️  Warning: Branch is old ($DAYS_OLD days): $BRANCH_DATE"
+                echo "Consider creating a fresh daily branch for current work"
+              fi
+            fi
+          else
+            echo "ℹ️  Not a daily branch: $BRANCH_NAME"
+            echo "Daily branches should follow pattern: feat/YYYY-MM-DD-description"
+          fi
+
+  check-secrets:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for Secrets in PR
+        run: |
+          echo "🔍 Checking for potential secrets in pull request..."
+          
+          # Check for files that shouldn't be committed
+          SECRET_FILES=$(git diff --name-only origin/main..HEAD | grep -E '\.(env|key)$|^secrets/' || true)
+          if [[ -n "$SECRET_FILES" ]]; then
+            echo "❌ Found files that may contain secrets:"
+            echo "$SECRET_FILES"
+            echo ""
+            echo "These files should not be committed to git."
+            echo "Please remove them and add to .gitignore if needed."
+            exit 1
+          fi
+          
+          # Check for secret-like content in diffs
+          SECRET_CONTENT=$(git diff origin/main..HEAD | grep -E 'API_KEY|SECRET_KEY|PERPLEXITY_API_KEY|BEGIN (RSA )?PRIVATE KEY' || true)
+          if [[ -n "$SECRET_CONTENT" ]]; then
+            echo "❌ Found potential secrets in diff:"
+            echo "$SECRET_CONTENT"
+            echo ""
+            echo "Please remove secrets from code and use environment variables instead."
+            exit 1
+          fi
+          
+          echo "✅ No secrets detected in pull request"
+
+  daily-branch-cleanup:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Cleanup Old Daily Branches
+        run: |
+          echo "🧹 Checking for old daily branches to cleanup..."
+          
+          # Calculate cutoff date (7 days ago)
+          CUTOFF_DATE=$(date -d "7 days ago" +%Y-%m-%d)
+          echo "Cutoff date: $CUTOFF_DATE"
+          
+          # Find old daily branches
+          OLD_BRANCHES=$(git branch -r | grep -E 'origin/(feat|fix|hotfix)/[0-9]{4}-[0-9]{2}-[0-9]{2}-' | sed 's|origin/||' || echo "")
+          
+          DELETED_COUNT=0
+          if [[ -n "$OLD_BRANCHES" ]]; then
+            while IFS= read -r branch; do
+              if [[ -n "$branch" ]]; then
+                # Extract date from branch name
+                BRANCH_DATE=$(echo "$branch" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
+                
+                if [[ -n "$BRANCH_DATE" && "$BRANCH_DATE" < "$CUTOFF_DATE" ]]; then
+                  echo "🗑️  Deleting old branch: $branch (date: $BRANCH_DATE)"
+                  
+                  # Delete the remote branch
+                  if git push origin --delete "$branch" 2>/dev/null; then
+                    echo "✅ Deleted: $branch"
+                    DELETED_COUNT=$((DELETED_COUNT + 1))
+                  else
+                    echo "⚠️  Failed to delete: $branch"
+                  fi
+                fi
+              fi
+            done <<< "$OLD_BRANCHES"
+          fi
+          
+          if [[ $DELETED_COUNT -eq 0 ]]; then
+            echo "✅ No old branches found to cleanup"
+          else
+            echo "✅ Cleaned up $DELETED_COUNT old daily branches"
+          fi
