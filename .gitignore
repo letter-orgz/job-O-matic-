@@ -5,6 +5,53 @@ __pycache__/
 *.so
 .Python
 build/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+
+# Application specific
+exports/
+outputs/
+data/
+db/
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/*.env# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
 develop-eggs/
 dist/
 downloads/
