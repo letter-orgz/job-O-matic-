@@ -16,7 +16,10 @@ if [ "$CODESPACES" = "true" ]; then
     echo "💳 Codespace Billing Information:"
     echo "  Repository: letter-orgz/job-O-matic-"
     echo "  This Codespace should be billed to letter-orgz organization"
-    echo "  If you see personal charges, run: ./check-billing.sh"
+    echo ""
+    echo "🚨 BILLING ISSUE WARNING:"
+    echo "  If you are v4mpire77: Check .github/BILLING_RESOLUTION_GUIDE.md"
+    echo "  If you see personal charges: run ./check-billing.sh"
     echo ""
 fi
 

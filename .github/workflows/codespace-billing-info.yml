@@ -1,31 +1,62 @@
-name: Organization Codespace Configuration
+name: Organization Codespace Configuration & Billing Check
 
 on:
   workflow_dispatch:
+    inputs:
+      admin_confirmation:
+        description: 'Confirm you are an organization admin running this check'
+        required: true
+        default: 'yes'
+        type: choice
+        options:
+        - 'yes'
+        - 'no'
 
 jobs:
-  codespace-info:
+  codespace-billing-check:
     runs-on: ubuntu-latest
+    if: github.event.inputs.admin_confirmation == 'yes'
     steps:
-      - name: Display Codespace Billing Information
+      - name: Display Codespace Billing Resolution Information
         run: |
           echo "==============================================="
-          echo "GitHub Codespaces Organization Billing Setup"
+          echo "🚨 URGENT: v4mpire77 Billing Issue Resolution"
           echo "==============================================="
           echo ""
           echo "Repository: letter-orgz/job-O-matic-"
           echo "Organization: letter-orgz"
+          echo "Issue: v4mpire77 being charged personally"
           echo ""
-          echo "To ensure Codespaces are billed to the organization:"
+          echo "⚡ IMMEDIATE ADMIN ACTIONS REQUIRED:"
           echo ""
-          echo "1. Organization admins must enable Codespaces billing"
-          echo "2. Users must create Codespaces in organization context"
-          echo "3. Verify billing attribution in GitHub settings"
+          echo "1. Enable Organization Codespaces Billing (5 min):"
+          echo "   → https://github.com/organizations/letter-orgz/settings/billing"
+          echo "   → Set Codespaces spending limits"
           echo ""
-          echo "For detailed instructions, see:"
-          echo "📖 .github/CODESPACES_BILLING.md"
+          echo "2. Configure Codespaces Policies (3 min):"
+          echo "   → https://github.com/organizations/letter-orgz/settings/codespaces"
+          echo "   → Enable 'Allow for organization repositories'"
+          echo "   → Set billing to organization account"
           echo ""
-          echo "If v4mpire77 is still being charged personally,"
-          echo "please contact @letter-orgz/admins for assistance."
+          echo "3. Verify v4mpire77 Access (2 min):"
+          echo "   → https://github.com/orgs/letter-orgz/people"
+          echo "   → Confirm v4mpire77 is organization member"
           echo ""
+          echo "4. Test Resolution (5 min):"
+          echo "   → Ask v4mpire77 to delete existing Codespaces"
+          echo "   → Follow .github/BILLING_RESOLUTION_GUIDE.md"
+          echo "   → Verify billing shows 'letter-orgz' before creation"
+          echo ""
+          echo "📖 Detailed guides available:"
+          echo "   → Admin actions: .github/ADMIN_ACTION_ITEMS.md"
+          echo "   → User guide: .github/BILLING_RESOLUTION_GUIDE.md"
+          echo "   → Full docs: .github/CODESPACES_BILLING.md"
+          echo ""
+          echo "📞 After completing setup:"
+          echo "   → Notify v4mpire77 settings are complete"
+          echo "   → Monitor organization billing for charges"
+          echo "   → Update issue when resolved"
+          echo ""
+          echo "==============================================="
+          echo "⏱️  Estimated total resolution time: 15 minutes"
           echo "==============================================="

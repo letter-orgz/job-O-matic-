@@ -30,8 +30,10 @@ if [ "$CODESPACES" = "true" ]; then
     echo "  3. Look for this Codespace under organization billing"
     echo ""
     echo "❓ If you see charges on your personal account:"
-    echo "  📖 Read: .github/CODESPACES_BILLING.md"
-    echo "  📧 Contact: @letter-orgz/admins"
+    echo "  🚨 STOP using this Codespace immediately"
+    echo "  📖 Quick fix: .github/BILLING_RESOLUTION_GUIDE.md"
+    echo "  📧 Contact: @letter-orgz/admins with screenshots"
+    echo "  🔗 Personal billing: https://github.com/settings/billing"
     
 else
     echo "ℹ️  Not currently running in a Codespace"
@@ -42,6 +44,10 @@ else
     echo "  3. ⚠️  BEFORE clicking 'Create codespace':"
     echo "     - Check billing attribution shows 'letter-orgz'"
     echo "     - If it shows your username, see billing guide"
+    echo ""
+    echo "🚨 If you're v4mpire77 having billing issues:"
+    echo "  📖 Quick Resolution: .github/BILLING_RESOLUTION_GUIDE.md"
+    echo "  🛑 STOP creating Codespaces until billing is fixed"
     echo ""
     echo "📖 For detailed instructions:"
     echo "  Read: .github/CODESPACES_BILLING.md"
