@@ -62,6 +62,23 @@ job-O-matic/
 3. **Configure settings**: Use the Settings page for API keys
 4. **Start applying**: Use Job Search and Applications features
 
+## 🔍 PR Merge Readiness Checker
+
+Check which pull requests are ready to be merged:
+
+```bash
+# Quick check with GitHub CLI
+./scripts/check-prs.sh
+
+# Detailed analysis with Python
+python3 scripts/check-pr-merge-readiness.py
+
+# Or use the shell wrapper
+./scripts/check-pr-readiness.sh
+```
+
+See [docs/PR_MERGE_CHECKER.md](docs/PR_MERGE_CHECKER.md) for detailed usage instructions.
+
 ## 🆘 Troubleshooting
 
 ### Common Issues
