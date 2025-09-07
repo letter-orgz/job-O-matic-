@@ -1,0 +1,329 @@
+---
+name: Automated Branch Cleanup
+
+on:
+  schedule:
+    # Run every Monday at 2 AM UTC (weekly cleanup)
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no actual deletions)'
+        required: false
+        default: 'true'
+        type: boolean
+      retention_days:
+        description: 'Days to retain merged feature branches'
+        required: false
+        default: '7'
+        type: string
+      daily_branch_retention:
+        description: 'Days to retain daily branches'
+        required: false
+        default: '7'
+        type: string
+
+env:
+  # Protected branches that should never be deleted
+  PROTECTED_BRANCHES: "main,develop,master,staging,production"
+  # Default retention periods (can be overridden by workflow inputs)
+  DEFAULT_RETENTION_DAYS: 7
+  DEFAULT_DAILY_RETENTION: 7
+
+jobs:
+  branch-cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup configuration
+      id: config
+      run: |
+        # Set up configuration from inputs or defaults
+        DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+        RETENTION_DAYS="${{ github.event.inputs.retention_days || env.DEFAULT_RETENTION_DAYS }}"
+        DAILY_RETENTION="${{ github.event.inputs.daily_branch_retention || env.DEFAULT_DAILY_RETENTION }}"
+
+        echo "dry_run=$DRY_RUN" >> $GITHUB_OUTPUT
+        echo "retention_days=$RETENTION_DAYS" >> $GITHUB_OUTPUT
+        echo "daily_retention=$DAILY_RETENTION" >> $GITHUB_OUTPUT
+
+        echo "## Branch Cleanup Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dry Run Mode**: $DRY_RUN" >> $GITHUB_STEP_SUMMARY
+        echo "- **Feature Branch Retention**: $RETENTION_DAYS days" >> $GITHUB_STEP_SUMMARY
+        echo "- **Daily Branch Retention**: $DAILY_RETENTION days" >> $GITHUB_STEP_SUMMARY
+        echo "- **Protected Branches**: $PROTECTED_BRANCHES" >> $GITHUB_STEP_SUMMARY
+
+    - name: Fetch all branches
+      run: |
+        echo "Fetching all remote branches..."
+        git fetch --all --prune
+        echo "Available branches:"
+        git branch -r --format="%(refname:short) %(committerdate:iso8601)"
+
+    - name: Identify branches for cleanup
+      id: identify
+      run: |
+        set -e
+
+        # Create arrays to store branches for different cleanup actions
+        MERGED_BRANCHES=()
+        OLD_DAILY_BRANCHES=()
+        PROTECTED_LIST=()
+
+        # Convert protected branches to array
+        IFS=',' read -ra PROTECTED_LIST <<< "$PROTECTED_BRANCHES"
+
+        echo "## Branch Analysis" >> $GITHUB_STEP_SUMMARY
+
+        # Function to check if branch is protected
+        is_protected() {
+          local branch=$1
+          for protected in "${PROTECTED_LIST[@]}"; do
+            if [[ "$branch" == *"$protected"* ]]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        # Get current date for age calculations
+        CURRENT_DATE=$(date +%s)
+        RETENTION_SECONDS=$(( ${{ steps.config.outputs.retention_days }} * 24 * 60 * 60 ))
+        DAILY_RETENTION_SECONDS=$(( ${{ steps.config.outputs.daily_retention }} * 24 * 60 * 60 ))
+
+        echo "### Analyzing remote branches..." >> $GITHUB_STEP_SUMMARY
+
+        # Process all remote branches
+        for branch in $(git branch -r --format="%(refname:short)" | grep -v "HEAD" | sort); do
+          # Skip origin/ prefix for local operations
+          local_branch=${branch#origin/}
+
+          # Skip if protected
+          if is_protected "$local_branch"; then
+            echo "- 🛡️ **$local_branch**: Protected branch, skipping" >> $GITHUB_STEP_SUMMARY
+            continue
+          fi
+
+          # Get branch last commit date
+          COMMIT_DATE=$(git log -1 --format="%ct" "$branch" 2>/dev/null || echo "0")
+          BRANCH_AGE=$(( CURRENT_DATE - COMMIT_DATE ))
+          DAYS_OLD=$(( BRANCH_AGE / 86400 ))
+
+          # Check if branch has been merged into main or develop
+          IS_MERGED=false
+          for main_branch in main develop master; do
+            if git merge-base --is-ancestor "$branch" "origin/$main_branch" 2>/dev/null; then
+              IS_MERGED=true
+              break
+            fi
+          done
+
+          # Categorize branches for cleanup
+          if [[ "$IS_MERGED" == "true" ]] && [[ "$BRANCH_AGE" -gt "$RETENTION_SECONDS" ]]; then
+            MERGED_BRANCHES+=("$local_branch")
+            echo "- 🔀 **$local_branch**: Merged branch, $DAYS_OLD days old (marked for deletion)" >> $GITHUB_STEP_SUMMARY
+          elif [[ "$local_branch" =~ ^(daily|temp|tmp)-.*$ ]] && [[ "$BRANCH_AGE" -gt "$DAILY_RETENTION_SECONDS" ]]; then
+            OLD_DAILY_BRANCHES+=("$local_branch")
+            echo "- 📅 **$local_branch**: Daily/temp branch, $DAYS_OLD days old (marked for deletion)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ **$local_branch**: Active branch, $DAYS_OLD days old (keeping)" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+
+        # Store results for next step
+        printf '%s\n' "${MERGED_BRANCHES[@]}" > merged_branches.txt
+        printf '%s\n' "${OLD_DAILY_BRANCHES[@]}" > old_daily_branches.txt
+
+        TOTAL_TO_DELETE=$(( ${#MERGED_BRANCHES[@]} + ${#OLD_DAILY_BRANCHES[@]} ))
+        echo "total_branches=$TOTAL_TO_DELETE" >> $GITHUB_OUTPUT
+
+        echo "### Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Merged branches to delete**: ${#MERGED_BRANCHES[@]}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Old daily branches to delete**: ${#OLD_DAILY_BRANCHES[@]}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Total branches for cleanup**: $TOTAL_TO_DELETE" >> $GITHUB_STEP_SUMMARY
+
+    - name: Delete merged feature branches
+      if: steps.identify.outputs.total_branches > 0
+      run: |
+        echo "## Branch Deletion Process" >> $GITHUB_STEP_SUMMARY
+        
+        DELETED_COUNT=0
+        FAILED_DELETIONS=()
+        
+        # Process merged branches
+        if [[ -s merged_branches.txt ]]; then
+          echo "### Deleting merged feature branches..." >> $GITHUB_STEP_SUMMARY
+          while IFS= read -r branch; do
+            [[ -z "$branch" ]] && continue
+            
+            if [[ "${{ steps.config.outputs.dry_run }}" == "true" ]]; then
+              echo "- 🧪 **$branch**: Would delete (dry-run mode)" >> $GITHUB_STEP_SUMMARY
+              ((DELETED_COUNT++))
+            else
+              echo "Deleting merged branch: $branch"
+              if git push origin --delete "$branch" 2>/dev/null; then
+                echo "- ✅ **$branch**: Successfully deleted" >> $GITHUB_STEP_SUMMARY
+                ((DELETED_COUNT++))
+              else
+                echo "- ❌ **$branch**: Failed to delete" >> $GITHUB_STEP_SUMMARY
+                FAILED_DELETIONS+=("$branch")
+              fi
+            fi
+          done < merged_branches.txt
+        fi
+        
+        # Process old daily branches
+        if [[ -s old_daily_branches.txt ]]; then
+          echo "### Deleting old daily branches..." >> $GITHUB_STEP_SUMMARY
+          while IFS= read -r branch; do
+            [[ -z "$branch" ]] && continue
+            
+            if [[ "${{ steps.config.outputs.dry_run }}" == "true" ]]; then
+              echo "- 🧪 **$branch**: Would delete (dry-run mode)" >> $GITHUB_STEP_SUMMARY
+              ((DELETED_COUNT++))
+            else
+              echo "Deleting old daily branch: $branch"
+              if git push origin --delete "$branch" 2>/dev/null; then
+                echo "- ✅ **$branch**: Successfully deleted" >> $GITHUB_STEP_SUMMARY
+                ((DELETED_COUNT++))
+              else
+                echo "- ❌ **$branch**: Failed to delete" >> $GITHUB_STEP_SUMMARY
+                FAILED_DELETIONS+=("$branch")
+              fi
+            fi
+          done < old_daily_branches.txt
+        fi
+        
+        echo "deleted_count=$DELETED_COUNT" >> $GITHUB_OUTPUT
+        echo "failed_count=${#FAILED_DELETIONS[@]}" >> $GITHUB_OUTPUT
+        
+        # Store failed deletions for notification
+        printf '%s\n' "${FAILED_DELETIONS[@]}" > failed_deletions.txt
+        
+        echo "### Deletion Summary" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.config.outputs.dry_run }}" == "true" ]]; then
+          echo "- **Would delete**: $DELETED_COUNT branches" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Successfully deleted**: $DELETED_COUNT branches" >> $GITHUB_STEP_SUMMARY
+          echo "- **Failed deletions**: ${#FAILED_DELETIONS[@]} branches" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Create cleanup report issue
+      if: steps.identify.outputs.total_branches > 0 && github.event_name == 'schedule'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read the files created in previous steps
+          let mergedBranches = [];
+          let oldDailyBranches = [];
+          let failedDeletions = [];
+          
+          try {
+            mergedBranches = fs.readFileSync('merged_branches.txt', 'utf8').trim().split('\n').filter(Boolean);
+          } catch (e) { /* file might be empty */ }
+          
+          try {
+            oldDailyBranches = fs.readFileSync('old_daily_branches.txt', 'utf8').trim().split('\n').filter(Boolean);
+          } catch (e) { /* file might be empty */ }
+          
+          try {
+            failedDeletions = fs.readFileSync('failed_deletions.txt', 'utf8').trim().split('\n').filter(Boolean);
+          } catch (e) { /* file might be empty */ }
+          
+          const isDryRun = '${{ steps.config.outputs.dry_run }}' === 'true';
+          const deletedCount = '${{ env.deleted_count || 0 }}';
+          const failedCount = '${{ env.failed_count || 0 }}';
+          
+          const title = isDryRun 
+            ? `🧪 Branch Cleanup Report (Dry Run) - ${new Date().toISOString().split('T')[0]}`
+            : `🧹 Weekly Branch Cleanup Report - ${new Date().toISOString().split('T')[0]}`;
+          
+          let body = `## Automated Branch Cleanup Report\n\n`;
+          body += `**Date**: ${new Date().toLocaleString()}\n`;
+          body += `**Mode**: ${isDryRun ? 'Dry Run' : 'Live Cleanup'}\n`;
+          body += `**Retention Policy**: ${{ steps.config.outputs.retention_days }} days for merged branches, ${{ steps.config.outputs.daily_retention }} days for daily branches\n\n`;
+          
+          if (isDryRun) {
+            body += `### 🧪 Dry Run Results\n`;
+            body += `- **Would delete**: ${deletedCount} branches\n\n`;
+          } else {
+            body += `### ✅ Cleanup Results\n`;
+            body += `- **Successfully deleted**: ${deletedCount} branches\n`;
+            body += `- **Failed deletions**: ${failedCount} branches\n\n`;
+          }
+          
+          if (mergedBranches.length > 0) {
+            body += `### 🔀 Merged Feature Branches ${isDryRun ? '(Would Delete)' : '(Deleted)'}\n`;
+            mergedBranches.forEach(branch => {
+              body += `- \`${branch}\`\n`;
+            });
+            body += `\n`;
+          }
+          
+          if (oldDailyBranches.length > 0) {
+            body += `### 📅 Old Daily/Temporary Branches ${isDryRun ? '(Would Delete)' : '(Deleted)'}\n`;
+            oldDailyBranches.forEach(branch => {
+              body += `- \`${branch}\`\n`;
+            });
+            body += `\n`;
+          }
+          
+          if (failedDeletions.length > 0 && !isDryRun) {
+            body += `### ❌ Failed Deletions\n`;
+            body += `The following branches could not be deleted and may require manual intervention:\n\n`;
+            failedDeletions.forEach(branch => {
+              body += `- \`${branch}\`\n`;
+            });
+            body += `\n`;
+          }
+          
+          body += `### 🛡️ Protected Branches\n`;
+          body += `The following branches are protected and will never be deleted:\n`;
+          const protectedBranches = '${{ env.PROTECTED_BRANCHES }}'.split(',');
+          protectedBranches.forEach(branch => {
+            body += `- \`${branch.trim()}\`\n`;
+          });
+          
+          body += `\n---\n`;
+          body += `\n*This issue was automatically created by the [Branch Cleanup workflow](${context.payload.repository.html_url}/actions/workflows/branch-cleanup.yml).*\n`;
+          body += `*To modify cleanup settings, edit the workflow file or run manually with custom parameters.*`;
+          
+          // Create the issue
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['automation', 'maintenance', 'branch-cleanup']
+          });
+
+    - name: Cleanup temporary files
+      if: always()
+      run: |
+        rm -f merged_branches.txt old_daily_branches.txt failed_deletions.txt
+
+    - name: Final summary
+      run: |
+        echo "## 🎉 Branch Cleanup Complete!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The automated branch cleanup workflow has finished processing." >> $GITHUB_STEP_SUMMARY
+        echo "Check the job logs above for detailed information about which branches were processed." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.config.outputs.dry_run }}" == "true" ]]; then
+          echo "**Note**: This was a dry run. No branches were actually deleted." >> $GITHUB_STEP_SUMMARY
+          echo "To perform actual cleanup, run the workflow with dry_run set to false." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "**Repository cleanup completed successfully!** 🧹" >> $GITHUB_STEP_SUMMARY
+        fi
