@@ -27,7 +27,9 @@
     },
 
     "onCreateCommand": "pip install --upgrade pip",
-    "postCreateCommand": "pip install -r requirements.txt",
+    "postCreateCommand": "pip install -r requirements.txt && echo '✅ Job-O-Matic setup complete! Use: ./start.sh or streamlit run app.py'",
+    
+    "postStartCommand": "echo '🎯 Job-O-Matic is ready! Run ./start.sh to launch the application.'",
     
     "forwardPorts": [8501],
     "portsAttributes": {
