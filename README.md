@@ -5,6 +5,22 @@ we gonna get this bread
 
 **If you are being charged personally for Codespaces from this repository, please read [.github/CODESPACES_BILLING.md](.github/CODESPACES_BILLING.md) for instructions on how to ensure billing goes to the letter-orgz organization instead.**
 
+## 🌅 Daily Development Workflow
+
+This repository includes a complete branch management and daily workflow system. See [WORKFLOW.md](WORKFLOW.md) for full details.
+
+**Quick Start:**
+```bash
+# Start your development day with clean setup
+./scripts/daily-setup.sh
+
+# Create feature branches for specific work
+./scripts/new-feature.sh "feature-name"
+
+# Clean up old branches safely
+./scripts/branch-cleanup.sh
+```
+
 ## 🚀 Getting Started with Codespaces
 
 This repository is configured with GitHub Codespaces for easy development setup.

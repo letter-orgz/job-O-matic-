@@ -45,7 +45,11 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-/tmp/*.env# Python
+/tmp/
+
+# Script temporary files
+scripts/*.log
+scripts/temp/# Python
 __pycache__/
 *.py[cod]
 *$py.class
