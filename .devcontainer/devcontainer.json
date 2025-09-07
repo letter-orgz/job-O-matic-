@@ -27,9 +27,9 @@
     },
 
     "onCreateCommand": "pip install --upgrade pip",
-    "postCreateCommand": "pip install -r requirements.txt && echo '✅ Job-O-Matic setup complete! Use: ./start.sh or streamlit run app.py' && echo '📋 This Codespace should be billed to letter-orgz organization.' && echo '📖 See .github/CODESPACES_BILLING.md for billing info.'",
+    "postCreateCommand": "pip install -r requirements.txt && chmod +x scripts/*.sh && echo '✅ Job-O-Matic setup complete! Use: ./start.sh or streamlit run app.py' && echo '📋 This Codespace should be billed to letter-orgz organization.' && echo '📖 See .github/CODESPACES_BILLING.md for billing info.'",
     
-    "postStartCommand": "echo '🎯 Job-O-Matic is ready! Run ./start.sh to launch the application.' && echo '⚠️  If you see personal billing charges, check .github/CODESPACES_BILLING.md'",
+    "postStartCommand": "echo '🎯 Job-O-Matic is ready!' && echo '🌅 Run ./scripts/daily-setup.sh for daily workflow setup' && echo '🚀 Or run ./start.sh to launch the application directly' && echo '⚠️  If you see personal billing charges, check .github/CODESPACES_BILLING.md'",
     
     "forwardPorts": [8501],
     "portsAttributes": {
