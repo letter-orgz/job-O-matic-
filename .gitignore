@@ -45,7 +45,10 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-/tmp/*.env# Python
+/tmp/
+
+# Development workflow files
+.feature-branch-info
 __pycache__/
 *.py[cod]
 *$py.class

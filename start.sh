@@ -3,6 +3,15 @@
 
 echo "🎯 Starting Job-O-Matic..."
 
+# Display daily workflow tip
+if [ -f "scripts/start-day.sh" ]; then
+    echo ""
+    echo "💡 Daily Development Tip:"
+    echo "  Use './scripts/start-day.sh' for daily git workflow setup"
+    echo "  This includes branch management and environment preparation"
+    echo ""
+fi
+
 # Check if we're in the right directory
 if [ ! -f "app.py" ]; then
     echo "❌ Error: app.py not found in current directory"
