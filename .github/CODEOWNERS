@@ -1,0 +1,18 @@
+# Code Owners for letter-orgz/job-O-matic-
+# This file ensures that organization members have proper access
+# and helps with Codespace billing attribution
+
+# Global owners (organization admins)
+* @letter-orgz/admins
+
+# Specific areas
+.devcontainer/ @letter-orgz/admins
+.github/ @letter-orgz/admins
+requirements.txt @letter-orgz/admins
+
+# Documentation
+*.md @letter-orgz/admins
+
+# Main application
+app.py @letter-orgz/admins
+start.sh @letter-orgz/admins

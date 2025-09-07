@@ -169,7 +169,7 @@ config_template = """
 # Copy this to .env and fill in your values
 
 # Perplexity API
-PERPLEXITY_API_KEY=sk-...
+PERPLEXITY_API_KEY="your_key_here"
 MODEL=sonar-pro
 
 # Database

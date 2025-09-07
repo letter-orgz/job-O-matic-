@@ -1,0 +1,31 @@
+name: Organization Codespace Configuration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  codespace-info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display Codespace Billing Information
+        run: |
+          echo "==============================================="
+          echo "GitHub Codespaces Organization Billing Setup"
+          echo "==============================================="
+          echo ""
+          echo "Repository: letter-orgz/job-O-matic-"
+          echo "Organization: letter-orgz"
+          echo ""
+          echo "To ensure Codespaces are billed to the organization:"
+          echo ""
+          echo "1. Organization admins must enable Codespaces billing"
+          echo "2. Users must create Codespaces in organization context"
+          echo "3. Verify billing attribution in GitHub settings"
+          echo ""
+          echo "For detailed instructions, see:"
+          echo "📖 .github/CODESPACES_BILLING.md"
+          echo ""
+          echo "If v4mpire77 is still being charged personally,"
+          echo "please contact @letter-orgz/admins for assistance."
+          echo ""
+          echo "==============================================="
