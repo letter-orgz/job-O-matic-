@@ -8,6 +8,7 @@ echo "🧹 Job-O-Matic Branch Cleanup Utility"
 
 # Configuration
 DEFAULT_OLDER_THAN_DAYS=7
+OLDER_THAN_DAYS=$DEFAULT_OLDER_THAN_DAYS
 DAILY_ONLY=false
 DRY_RUN=false
 FORCE=false
