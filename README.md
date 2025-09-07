@@ -1,6 +1,19 @@
 # job-O-matic-
 we gonna get this bread
 
+## 🧹 Automated Branch Cleanup
+
+This repository includes an automated branch cleanup system that runs weekly to maintain a clean repository structure. The system:
+
+- 🗓️ **Runs weekly** (Mondays at 2 AM UTC)
+- 🛡️ **Protects important branches** (main, develop, staging, production)
+- 🔄 **Deletes merged feature branches** automatically after 7 days
+- 📅 **Archives old daily branches** (daily-, temp-, tmp- prefixed)
+- 🧪 **Includes dry-run mode** for safe testing
+- 📊 **Creates cleanup reports** as GitHub issues
+
+For detailed information, see [Branch Cleanup Documentation](.github/BRANCH_CLEANUP.md).
+
 ## ⚠️ Important: Codespace Billing Notice
 
 **If you are being charged personally for Codespaces from this repository, please read [.github/CODESPACES_BILLING.md](.github/CODESPACES_BILLING.md) for instructions on how to ensure billing goes to the letter-orgz organization instead.**

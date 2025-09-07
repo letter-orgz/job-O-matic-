@@ -1,7 +1,7 @@
 ---
 name: Automated Branch Cleanup
 
-on:
+"on":
   schedule:
     # Run every Monday at 2 AM UTC (weekly cleanup)
     - cron: '0 2 * * 1'
