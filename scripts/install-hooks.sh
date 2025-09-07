@@ -15,8 +15,9 @@ if git diff --cached --name-only | grep -E '^(\.env|config\.yaml|secrets/)' -q; 
   exit 1
 fi
 
-# Block committing secret-looking content (but not in git hooks or documentation)
-if git diff --cached --name-only | grep -v -E '\.(md|sh)$|/hooks/' | xargs git diff --cached | grep -E 'API_KEY|SECRET_KEY|PERPLEXITY_API_KEY|BEGIN RSA PRIVATE KEY' -q 2>/dev/null; then
+# Block committing secret-looking content (except in documentation and hook files)
+CHANGED_FILES=$(git diff --cached --name-only)
+if echo "$CHANGED_FILES" | grep -v -E '\.(md|txt)$|scripts/install-hooks\.sh$' | xargs -r git diff --cached -- | grep -E 'API_KEY|SECRET_KEY|PERPLEXITY_API_KEY|BEGIN RSA PRIVATE KEY' -q 2>/dev/null; then
   echo "❌ Blocked: looks like a secret in the staged diff. Move it to .env and try again."
   exit 1
 fi
