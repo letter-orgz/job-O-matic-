@@ -62,6 +62,14 @@ job-O-matic/
 3. **Configure settings**: Use the Settings page for API keys
 4. **Start applying**: Use Job Search and Applications features
 
+## 🔌 GitHub Apps & Integrations
+
+### ChatGPT Codex Connector
+For AI-powered code suggestions and automated assistance:
+- **Setup Guide**: [CHATGPT_CODEX_CONNECTOR_SETUP.md](CHATGPT_CODEX_CONNECTOR_SETUP.md)
+- **Installation**: [GitHub App Installation](https://github.com/apps/chatgpt-codex-connector/installations/select_target)
+- **Requirements**: Admin access to repository or organization
+
 ## 🔍 PR Merge Readiness Checker
 
 Check which pull requests are ready to be merged:
