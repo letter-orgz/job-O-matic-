@@ -8,7 +8,9 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-import os
+
+# Local modules
+from src.opportunities import load_opportunities, add_opportunity
 
 # Configure Streamlit page
 st.set_page_config(
@@ -145,15 +147,53 @@ def show_job_search():
 def show_applications():
     """Display applications management"""
     st.header("📨 Applications")
-    
-    st.info("🚧 Application management functionality will be implemented here.")
-    st.markdown("""
-    **Features to be implemented:**
-    - View all job applications
-    - Track application status
-    - Generate tailored CVs and cover letters
-    - Send applications via API
-    """)
+
+    st.subheader("Add New Opportunity")
+
+    # A form keeps the interface tidy and only saves when explicitly submitted.
+    with st.form("opportunity_form"):
+        title = st.text_input("Position Title")
+        organisation = st.text_input("Organisation")
+        opportunity_type = st.selectbox(
+            "Opportunity Type",
+            [
+                "Internship",
+                "Clerkship",
+                "Research",
+                "Court Shadowing",
+                "Networking",
+            ],
+        )
+
+        st.markdown("### Required Documents")
+        transcript = st.checkbox("Transcript")
+        references = st.checkbox("References")
+        writing_sample = st.checkbox("Writing Sample")
+        bar_status = st.text_input("Bar Status")
+
+        submitted = st.form_submit_button("Save Opportunity")
+
+    if submitted:
+        opportunity = {
+            "title": title,
+            "organisation": organisation,
+            "opportunity_type": opportunity_type,
+            "transcript": transcript,
+            "references": references,
+            "writing_sample": writing_sample,
+            "bar_status": bar_status,
+            "date_added": datetime.now().isoformat(),
+        }
+        add_opportunity(opportunity)
+        st.success("Opportunity saved")
+
+    # Display existing opportunities for quick reference.
+    opportunities = load_opportunities()
+    if opportunities:
+        st.subheader("Tracked Opportunities")
+        st.dataframe(pd.DataFrame(opportunities))
+    else:
+        st.info("No opportunities tracked yet.")
 
 def show_settings():
     """Display settings page"""
