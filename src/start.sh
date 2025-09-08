@@ -3,10 +3,11 @@
 
 echo "🎯 Starting Job-O-Matic..."
 
-# Check if we're in the right directory
-if [ ! -f "app.py" ]; then
-    echo "❌ Error: app.py not found in current directory"
-    echo "Please make sure you're running this script from the job-O-matic root directory"
+# Ensure the app entry point exists
+APP_PATH="src/app.py"
+if [ ! -f "$APP_PATH" ]; then
+    echo "❌ Error: $APP_PATH not found"
+    echo "Please make sure you're running this script from the repository root"
     exit 1
 fi
 
@@ -41,9 +42,10 @@ fi
 if [ "$CODESPACES" = "true" ]; then
     echo "📡 Running in GitHub Codespaces"
     # Start Streamlit with Codespace-friendly settings
-    streamlit run app.py --server.headless true --server.port 8501 --server.address 0.0.0.0
+    streamlit run "$APP_PATH" --server.headless true --server.port 8501 --server.address 0.0.0.0
 else
     echo "💻 Running locally"
     # Start Streamlit normally
-    streamlit run app.py
+    streamlit run "$APP_PATH"
 fi
+

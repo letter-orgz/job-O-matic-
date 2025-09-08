@@ -38,7 +38,10 @@ ENV/
 # Application specific
 exports/
 outputs/
-data/
+# Ignore all data except version-controlled CVs
+data/*
+!data/cv/
+!data/cv/*
 db/
 *.db
 *.sqlite

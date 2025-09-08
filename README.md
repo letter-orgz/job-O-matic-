@@ -10,14 +10,14 @@ This repository is configured with GitHub Codespaces for easy development setup.
 2. Select "Codespaces" tab
 3. Click "Create codespace on main"
 4. Wait for the environment to set up automatically
-5. Once setup is complete, run: `./start.sh` or `streamlit run app.py`
+5. Once setup is complete, run: `./src/start.sh` or `streamlit run src/app.py`
 6. The application will be available on port 8501
 
 ### Option 2: Local Development
 1. Clone this repository
 2. Install Python 3.11+
 3. Install dependencies: `pip install -r requirements.txt`
-4. Run the Streamlit app: `streamlit run app.py`
+4. Run the Streamlit app: `streamlit run src/app.py`
 
 The Codespace will automatically:
 - Set up Python 3.11 environment
@@ -30,12 +30,12 @@ The Codespace will automatically:
 
 ```
 job-O-matic/
-├── app.py                    # Main Streamlit application
-├── start.sh                  # Startup script
-├── data/                     # User data (gitignored)
+├── src/                      # Source code
+│   ├── app.py                # Main Streamlit application
+│   └── start.sh              # Startup script
+├── data/                     # User data (partially gitignored)
 │   ├── cv/                   # CV files
 │   └── templates/            # Email templates
-├── src/                      # Source code
 ├── exports/                  # Export files (gitignored)
 ├── outputs/                  # Generated bundles (gitignored)
 └── .devcontainer/           # Codespace configuration
@@ -52,17 +52,17 @@ job-O-matic/
 
 ### Common Issues
 
-**If you encounter "No such file or directory" when running `./start.sh`:**
-- Make sure you're in the job-O-matic root directory (where `app.py` exists)
-- Verify the script has execute permissions: `chmod +x start.sh`
-- The enhanced start.sh script will now automatically install missing dependencies
+**If you encounter "No such file or directory" when running `./src/start.sh`:**
+- Make sure you're in the job-O-matic root directory (where `src/app.py` exists)
+- Verify the script has execute permissions: `chmod +x src/start.sh`
+- The enhanced `src/start.sh` script will now automatically install missing dependencies
 
 **If you encounter "Codespace access limited" errors:**
 - Refresh the Codespace
 - Check if the container built successfully
-- Run `./start.sh` manually if the app doesn't auto-start
+- Run `./src/start.sh` manually if the app doesn't auto-start
 
 **If you encounter dependency issues:**
-- The start.sh script will automatically install dependencies from requirements.txt
+- The `src/start.sh` script will automatically install dependencies from requirements.txt
 - You can also manually install: `pip3 install -r requirements.txt`
 - Ensure you have Python 3.11+ installed
