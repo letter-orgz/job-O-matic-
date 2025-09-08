@@ -11,6 +11,18 @@ from datetime import datetime
 
 # Local modules
 from src.opportunities import load_opportunities, add_opportunity
+from src.gamification import (
+    get_engine,
+    init_db,
+    record_application,
+    available_boost_cards,
+    activate_boost,
+    active_boost,
+    get_state,
+    get_earned_badges,
+    Badge,
+)
+from sqlmodel import Session, select
 
 # Configure Streamlit page
 st.set_page_config(
@@ -19,6 +31,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+ENGINE = get_engine(Path("data/gamification.db"))
+init_db(ENGINE)
 
 def main():
     """Main application function"""
@@ -93,43 +108,39 @@ Email and cover letter templates go in `templates/`:
 def show_dashboard():
     """Display main dashboard"""
     st.header("📊 Dashboard")
-    
-    # Sample metrics
+
+    with Session(ENGINE) as session:
+        state = get_state(session)
+        boost = active_boost(session)
+        badges = get_earned_badges(session)
+        badge_lookup = {b.id: b for b in session.exec(select(Badge))}
+
     col1, col2, col3, col4 = st.columns(4)
-    
     with col1:
-        st.metric("Total Jobs Found", "0", "0")
-    
+        st.metric("Total XP", state.xp)
     with col2:
-        st.metric("Applications Sent", "0", "0")
-    
+        st.metric("Current Streak", state.streak)
     with col3:
-        st.metric("Pending Reviews", "0", "0")
-    
+        st.metric("Badges", len(badges))
     with col4:
-        st.metric("Success Rate", "0%", "0%")
-    
-    # Status overview
-    st.subheader("📋 Recent Activity")
-    
-    # Check if there are any data files
-    if not any(Path("data/cv").glob("*")) if Path("data/cv").exists() else True:
-        st.info("👋 Welcome to Job-O-Matic! Get started by:")
-        st.markdown("""
-        1. **Upload your CV files** to the `data/cv/` directory
-        2. **Configure your settings** in the Settings page  
-        3. **Start searching** for jobs in the Job Search page
-        4. **Manage applications** in the Applications page
-        """)
+        boost_name = boost.type.replace("_", " ").title() if boost else "None"
+        st.metric("Active Boost", boost_name)
+
+    if boost:
+        st.info(f"Boost active until {boost.expires_at:%Y-%m-%d %H:%M}")
     else:
-        st.success("✅ System is ready to use!")
-        
-        # Show CV files found
-        cv_files = list(Path("data/cv").glob("*"))
-        if cv_files:
-            st.write("**CV Files Found:**")
-            for cv_file in cv_files:
-                st.write(f"📄 {cv_file.name}")
+        with Session(ENGINE) as session:
+            cards = available_boost_cards(session)
+        if cards and st.button("Activate Double XP (24h)"):
+            activate_boost(ENGINE, cards[0].id)
+            st.experimental_rerun()
+
+    if badges:
+        st.subheader("🏅 Badges")
+        cols = st.columns(len(badges))
+        for col, earned in zip(cols, badges):
+            badge = badge_lookup.get(earned.badge_id)
+            col.image(earned.image_path, caption=badge.name if badge else "Badge")
 
 def show_job_search():
     """Display job search interface"""
@@ -170,6 +181,7 @@ def show_applications():
         references = st.checkbox("References")
         writing_sample = st.checkbox("Writing Sample")
         bar_status = st.text_input("Bar Status")
+        effort = st.selectbox("Effort Level", ["Low", "Medium", "High"])
 
         submitted = st.form_submit_button("Save Opportunity")
 
@@ -183,9 +195,14 @@ def show_applications():
             "writing_sample": writing_sample,
             "bar_status": bar_status,
             "date_added": datetime.now().isoformat(),
+            "effort": effort.lower(),
         }
         add_opportunity(opportunity)
+        earned = record_application(ENGINE, effort.lower())
         st.success("Opportunity saved")
+        for badge in earned:
+            st.success(f"Unlocked badge!")
+            st.image(badge.image_path)
 
     # Display existing opportunities for quick reference.
     opportunities = load_opportunities()
