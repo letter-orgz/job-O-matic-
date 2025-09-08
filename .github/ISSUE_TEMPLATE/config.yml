@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 General Questions & Discussions
+    url: https://github.com/letter-orgz/job-O-matic-/discussions
+    about: Ask questions, share ideas, or discuss features with the community
+  - name: 🏢 Organization Admin Support
+    url: https://github.com/orgs/letter-orgz/teams/admins
+    about: Contact organization administrators for access, billing, or governance issues
+  - name: 📖 Documentation
+    url: https://github.com/letter-orgz/job-O-matic-/blob/main/README.md
+    about: Check the README and documentation for setup and usage instructions

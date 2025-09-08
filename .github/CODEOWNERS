@@ -1,18 +1,36 @@
 # Code Owners for letter-orgz/job-O-matic-
-# This file ensures that organization members have proper access
-# and helps with Codespace billing attribution
+# This file ensures that organization members have proper access,
+# helps with Codespace billing attribution, and enforces governance
 
-# Global owners (organization admins)
+# Global owners (organization admins) - require review for all changes
 * @letter-orgz/admins
 
-# Specific areas
+# Critical infrastructure files - require extra scrutiny
 .devcontainer/ @letter-orgz/admins
 .github/ @letter-orgz/admins
+.gitignore @letter-orgz/admins
 requirements.txt @letter-orgz/admins
 
-# Documentation
-*.md @letter-orgz/admins
+# Security and compliance files - critical for governance
+scripts/install-hooks.sh @letter-orgz/admins
+compliance_best_practices.md @letter-orgz/admins
+CONTRIBUTING.md @letter-orgz/admins
+DEVELOPMENT_WORKFLOW.md @letter-orgz/admins
 
-# Main application
+# Main application files - core functionality
 app.py @letter-orgz/admins
 start.sh @letter-orgz/admins
+src/ @letter-orgz/admins
+
+# Configuration and deployment
+config_template.env @letter-orgz/admins
+*.yml @letter-orgz/admins
+*.yaml @letter-orgz/admins
+
+# Documentation - ensure quality and accuracy
+*.md @letter-orgz/admins
+
+# Any sensitive directories that might be added
+secrets/ @letter-orgz/admins
+keys/ @letter-orgz/admins
+private/ @letter-orgz/admins
