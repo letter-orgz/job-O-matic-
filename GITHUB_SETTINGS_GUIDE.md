@@ -189,6 +189,42 @@ Navigate to **Organization Settings > Codespaces**:
 https://github.com/organizations/letter-orgz/settings/codespaces
 ```
 
+## 🔌 GitHub Apps & Integrations
+
+### Recommended GitHub Apps
+
+Navigate to **Organization Settings > Installed GitHub Apps** or **Repository Settings > Integrations**:
+
+#### Development & Code Quality Apps
+- [ ] **ChatGPT Codex Connector**: ✅ **RECOMMENDED**
+  - **Purpose**: AI-powered code suggestions and automated code generation
+  - **Installation URL**: `https://github.com/apps/chatgpt-codex-connector/installations/select_target`
+  - **Permissions**: Repository contents (read), Pull requests (read/write), Issues (read/write)
+  - **Security**: Uses OpenAI API for code analysis and suggestions
+
+#### Installation Process
+1. **Navigate** to the app installation URL
+2. **Select** the target repository or organization
+3. **Review** requested permissions carefully
+4. **Configure** repository access (All repositories vs. Selected repositories)
+5. **Install** the app with appropriate permissions
+6. **Verify** installation in Settings > Integrations
+
+#### Security Considerations for GitHub Apps
+- [ ] **Review permissions**: Only grant necessary access levels
+- [ ] **Monitor activity**: Regular review of app activities in audit log
+- [ ] **Limit repository access**: Use "Selected repositories" when possible
+- [ ] **Revoke unused apps**: Periodically review and remove unused integrations
+
+### GitHub Apps Management URLs
+```
+# Organization-level app management
+https://github.com/organizations/letter-orgz/settings/installations
+
+# Repository-level integrations
+https://github.com/letter-orgz/job-O-matic-/settings/installations
+```
+
 ## 📋 Configuration Checklist
 
 ### Initial Setup (One-time)
@@ -198,6 +234,7 @@ https://github.com/organizations/letter-orgz/settings/codespaces
 - [ ] Team permissions configured
 - [ ] Labels created and organized
 - [ ] Codespaces billing configured
+- [ ] GitHub Apps installed and configured
 
 ### Regular Maintenance (Monthly)
 - [ ] Review access permissions
@@ -205,6 +242,7 @@ https://github.com/organizations/letter-orgz/settings/codespaces
 - [ ] Review and update labels
 - [ ] Check Dependabot alerts
 - [ ] Monitor workflow usage and permissions
+- [ ] Review installed GitHub Apps and their activity
 
 ### Security Review (Quarterly)
 - [ ] Audit team access levels
@@ -212,6 +250,7 @@ https://github.com/organizations/letter-orgz/settings/codespaces
 - [ ] Update branch protection rules if needed
 - [ ] Review workflow permissions
 - [ ] Validate compliance with organization policies
+- [ ] Audit GitHub Apps permissions and usage
 
 ## 🆘 Troubleshooting
 
@@ -231,6 +270,13 @@ https://github.com/organizations/letter-orgz/settings/codespaces
 1. Enable security features in repository settings
 2. Check organization-level security policies
 3. Verify admin permissions for security features
+
+#### GitHub Apps Not Working
+1. Check app installation status in repository settings
+2. Verify app has necessary permissions for the repository
+3. Review app activity logs for error messages
+4. Re-install the app if configuration issues persist
+5. Contact app developer support for app-specific issues
 
 ## 📞 Support
 
