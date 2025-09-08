@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omar's Job Radar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #4c51bf;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4c51bf;
+        }
+
+        .btn {
+            background: #4c51bf;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 81, 191, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4c51bf;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .jobs-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Desktop Table View */
+        .jobs-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .jobs-table th,
+        .jobs-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .jobs-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .jobs-table tr:hover {
+            background: #f3f4f6;
+        }
+
+        /* Mobile Card View */
+        .jobs-cards {
+            display: none;
+            padding: 20px;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4c51bf;
+        }
+
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .job-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .job-company {
+            color: #4c51bf;
+            font-weight: 600;
+        }
+
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .job-tag {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .job-tag.legal {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .job-tag.gigs {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .job-tag.remote {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #d1d5db;
+            transition: color 0.3s ease;
+        }
+
+        .star-btn.starred {
+            color: #fbbf24;
+        }
+
+        .star-btn:hover {
+            color: #fbbf24;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .modal-header h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 5px;
+        }
+
+        .close-btn:hover {
+            color: #374151;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .jobs-table {
+                display: none;
+            }
+            
+            .jobs-cards {
+                display: block;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading and Empty States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Checkbox styles for bulk operations */
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #4c51bf;
+        }
+
+        .bulk-actions {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .bulk-actions.show {
+            display: block;
+        }
+
+        /* Notes textarea */
+        .notes-textarea {
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Input file styling */
+        .file-input {
+            margin-bottom: 10px;
+        }
+
+        .url-input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header fade-in">
+            <h1>🎯 Omar's Job Radar</h1>
+            <p>Comprehensive Job Search & Application Management</p>
+        </div>
+
+        <!-- Controls Panel -->
+        <div class="controls fade-in">
+            <!-- Data Management Section -->
+            <div style="margin-bottom: 25px;">
+                <h3 style="margin-bottom: 15px; color: #374151;">📊 Data Management</h3>
+                <div class="controls-grid">
+                    <div class="form-group">
+                        <label>📋 Paste JSON Data</label>
+                        <textarea id="jsonInput" placeholder='Paste job data JSON here...' rows="3"></textarea>
+                        <button class="btn" onclick="importFromJSON()">Import JSON</button>
+                    </div>
+                    <div class="form-group">
+                        <label>📁 Upload File</label>
+                        <input type="file" id="fileInput" accept=".json,.csv" class="file-input">
+                        <button class="btn" onclick="importFromFile()">Import File</button>
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 GitHub URL</label>
+                        <input type="url" id="githubUrl" placeholder="https://github.com/user/repo" class="url-input">
+                        <button class="btn" onclick="fetchFromGitHub()">Fetch from GitHub</button>
+                    </div>
+                    <div class="form-group">
+                        <label>🔍 Perplexity Search</label>
+                        <input type="text" id="perplexityQuery" placeholder="Search for jobs..." class="url-input">
+                        <button class="btn" onclick="searchPerplexity()">Search Jobs</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div>
+                <h3 style="margin-bottom: 15px; color: #374151;">🔍 Filters</h3>
+                <div class="controls-grid">
+                    <div class="form-group">
+                        <label>🔎 Search</label>
+                        <input type="text" id="searchInput" placeholder="Search jobs..." oninput="applyFilters()">
+                    </div>
+                    <div class="form-group">
+                        <label>📂 Track</label>
+                        <select id="trackFilter" onchange="applyFilters()">
+                            <option value="">All Tracks</option>
+                            <option value="Legal">Legal</option>
+                            <option value="Gigs">Gigs</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🏢 Work Mode</label>
+                        <select id="workModeFilter" onchange="applyFilters()">
+                            <option value="">All Modes</option>
+                            <option value="Remote">Remote</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="On-site">On-site</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Contract Type</label>
+                        <select id="contractFilter" onchange="applyFilters()">
+                            <option value="">All Types</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Freelance">Freelance</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>👔 Seniority</label>
+                        <select id="seniorityFilter" onchange="applyFilters()">
+                            <option value="">All Levels</option>
+                            <option value="Entry">Entry Level</option>
+                            <option value="Mid">Mid Level</option>
+                            <option value="Senior">Senior Level</option>
+                            <option value="Lead">Lead/Principal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Date From</label>
+                        <input type="date" id="dateFromFilter" onchange="applyFilters()">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Date To</label>
+                        <input type="date" id="dateToFilter" onchange="applyFilters()">
+                    </div>
+                    <div class="form-group">
+                        <label style="margin-bottom: 15px;">🏠 Remote Only</label>
+                        <input type="checkbox" id="remoteOnlyFilter" onchange="applyFilters()" class="checkbox">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats fade-in">
+            <div class="stat-card">
+                <div class="stat-number" id="totalJobsCount">0</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="starredJobsCount">0</div>
+                <div class="stat-label">Starred</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="legalJobsCount">0</div>
+                <div class="stat-label">Legal Track</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="gigsJobsCount">0</div>
+                <div class="stat-label">Gigs Track</div>
+            </div>
+        </div>
+
+        <!-- Actions Bar -->
+        <div class="actions-bar fade-in">
+            <div>
+                <button class="btn" onclick="selectAll()">Select All</button>
+                <button class="btn btn-secondary" onclick="clearSelection()">Clear Selection</button>
+                <button class="btn" onclick="toggleBulkActions()">Bulk Actions</button>
+            </div>
+            <div>
+                <button class="btn" onclick="exportToCSV()">📥 Export CSV</button>
+                <button class="btn" onclick="exportToJSON()">📥 Export JSON</button>
+                <button class="btn btn-secondary" onclick="saveState()">💾 Save State</button>
+                <button class="btn btn-secondary" onclick="loadState()">📂 Load State</button>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Panel -->
+        <div class="bulk-actions" id="bulkActions">
+            <strong>Bulk Actions:</strong>
+            <button class="btn" onclick="bulkStar()">⭐ Star Selected</button>
+            <button class="btn btn-secondary" onclick="bulkUnstar()">☆ Unstar Selected</button>
+            <button class="btn" onclick="bulkExportCSV()">📥 Export Selected (CSV)</button>
+            <button class="btn" onclick="bulkExportJSON()">📥 Export Selected (JSON)</button>
+        </div>
+
+        <!-- Jobs Table/Cards -->
+        <div class="jobs-container fade-in">
+            <!-- Desktop Table View -->
+            <table class="jobs-table" id="jobsTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" class="checkbox"></th>
+                        <th>⭐</th>
+                        <th>Company</th>
+                        <th>Title</th>
+                        <th>Location</th>
+                        <th>Track</th>
+                        <th>Work Mode</th>
+                        <th>Contract</th>
+                        <th>Seniority</th>
+                        <th>Posted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="jobsTableBody">
+                    <!-- Jobs will be populated here -->
+                </tbody>
+            </table>
+
+            <!-- Mobile Card View -->
+            <div class="jobs-cards" id="jobsCards">
+                <!-- Job cards will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cover Letter Modal -->
+    <div class="modal" id="coverLetterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Cover Letter Outline</h2>
+                <button class="close-btn" onclick="closeCoverLetterModal()">&times;</button>
+            </div>
+            <div id="coverLetterContent">
+                <!-- Cover letter content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="modal" id="notesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Job Notes</h2>
+                <button class="close-btn" onclick="closeNotesModal()">&times;</button>
+            </div>
+            <div>
+                <textarea id="notesTextarea" class="notes-textarea" placeholder="Add your notes about this job..."></textarea>
+                <br><br>
+                <button class="btn" onclick="saveNotes()">💾 Save Notes</button>
+                <button class="btn btn-secondary" onclick="closeNotesModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let jobs = [];
+        let filteredJobs = [];
+        let selectedJobs = new Set();
+        let currentJobForNotes = null;
+
+        // Sample Jobs Data
+        const sampleJobs = [
+            {
+                id: 'job_001',
+                company: 'Clifford Chance',
+                title: 'Senior Legal Counsel - Technology',
+                location: 'London, UK',
+                track: 'Legal',
+                work_mode: 'Hybrid',
+                contract_type: 'Full-time',
+                seniority: 'Senior',
+                posted_date: '2024-01-15',
+                apply_url: 'https://careers.cliffordchance.com/jobs/001',
+                description: 'Leading global law firm seeking experienced technology lawyer for complex commercial transactions...',
+                salary_range: '£120,000 - £150,000',
+                starred: false,
+                notes: ''
+            },
+            {
+                id: 'job_002',
+                company: 'Magic Circle Firm',
+                title: 'Corporate Associate',
+                location: 'London, UK',
+                track: 'Legal',
+                work_mode: 'On-site',
+                contract_type: 'Full-time',
+                seniority: 'Mid',
+                posted_date: '2024-01-10',
+                apply_url: 'https://magicircle.com/careers/002',
+                description: 'Prestigious magic circle firm offering excellent career progression in corporate law...',
+                salary_range: '£85,000 - £110,000',
+                starred: true,
+                notes: 'Great opportunity for career growth. Strong corporate practice.'
+            },
+            {
+                id: 'job_003',
+                company: 'LegalTech Startup',
+                title: 'Freelance Legal Content Writer',
+                location: 'Remote',
+                track: 'Gigs',
+                work_mode: 'Remote',
+                contract_type: 'Freelance',
+                seniority: 'Mid',
+                posted_date: '2024-01-20',
+                apply_url: 'https://legaltech.startup/gigs/003',
+                description: 'Create engaging legal content for innovative legal technology platform...',
+                salary_range: '£50-80/hour',
+                starred: false,
+                notes: ''
+            }
+        ];
+
+        // Initialize Application
+        function initApp() {
+            // Load data from localStorage or use sample data
+            const savedJobs = localStorage.getItem('omars_job_radar_jobs');
+            if (savedJobs) {
+                jobs = JSON.parse(savedJobs);
+            } else {
+                jobs = [...sampleJobs];
+                saveToLocalStorage();
+            }
+
+            // Load other settings
+            loadFiltersFromStorage();
+            
+            applyFilters();
+            updateStats();
+        }
+
+        // Data Management Functions
+        function importFromJSON() {
+            const jsonText = document.getElementById('jsonInput').value.trim();
+            if (!jsonText) {
+                alert('Please paste JSON data first');
+                return;
+            }
+
+            try {
+                const newJobs = JSON.parse(jsonText);
+                const processed = Array.isArray(newJobs) ? newJobs : [newJobs];
+                
+                processed.forEach(job => {
+                    // Add missing fields with defaults
+                    job.id = job.id || 'job_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    job.starred = job.starred || false;
+                    job.notes = job.notes || '';
+                    job.track = job.track || 'Legal';
+                    
+                    // Check for duplicates using apply_url
+                    const existingJob = jobs.find(j => j.apply_url === job.apply_url);
+                    if (!existingJob) {
+                        jobs.push(job);
+                    }
+                });
+
+                document.getElementById('jsonInput').value = '';
+                saveToLocalStorage();
+                applyFilters();
+                updateStats();
+                alert(`Imported ${processed.length} jobs (duplicates skipped)`);
+            } catch (error) {
+                alert('Invalid JSON format: ' + error.message);
+            }
+        }
+
+        function importFromFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file first');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let data;
+                    if (file.name.endsWith('.csv')) {
+                        // Simple CSV parsing (basic implementation)
+                        data = parseCSV(e.target.result);
+                    } else {
+                        data = JSON.parse(e.target.result);
+                    }
+
+                    const processed = Array.isArray(data) ? data : [data];
+                    let imported = 0;
+
+                    processed.forEach(job => {
+                        job.id = job.id || 'job_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                        job.starred = job.starred || false;
+                        job.notes = job.notes || '';
+                        job.track = job.track || 'Legal';
+                        
+                        const existingJob = jobs.find(j => j.apply_url === job.apply_url);
+                        if (!existingJob) {
+                            jobs.push(job);
+                            imported++;
+                        }
+                    });
+
+                    fileInput.value = '';
+                    saveToLocalStorage();
+                    applyFilters();
+                    updateStats();
+                    alert(`Imported ${imported} jobs (duplicates skipped)`);
+                } catch (error) {
+                    alert('Error reading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function fetchFromGitHub() {
+            const url = document.getElementById('githubUrl').value.trim();
+            if (!url) {
+                alert('Please enter a GitHub URL');
+                return;
+            }
+
+            // Simulate GitHub API call (in real implementation, you'd make actual API calls)
+            alert('GitHub integration would fetch job data from repositories.\nThis is a demo - please use JSON import or file upload instead.');
+        }
+
+        function searchPerplexity() {
+            const query = document.getElementById('perplexityQuery').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            // Simulate Perplexity API call
+            alert('Perplexity integration would search for jobs based on your query.\nThis is a demo - please use JSON import or file upload instead.');
+        }
+
+        // Filtering Functions
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const trackFilter = document.getElementById('trackFilter').value;
+            const workModeFilter = document.getElementById('workModeFilter').value;
+            const contractFilter = document.getElementById('contractFilter').value;
+            const seniorityFilter = document.getElementById('seniorityFilter').value;
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+            const remoteOnly = document.getElementById('remoteOnlyFilter').checked;
+
+            filteredJobs = jobs.filter(job => {
+                // Search filter
+                if (searchTerm && !job.title.toLowerCase().includes(searchTerm) && 
+                    !job.company.toLowerCase().includes(searchTerm) &&
+                    !job.description.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+
+                // Track filter
+                if (trackFilter && job.track !== trackFilter) {
+                    return false;
+                }
+
+                // Work mode filter
+                if (workModeFilter && job.work_mode !== workModeFilter) {
+                    return false;
+                }
+
+                // Contract filter
+                if (contractFilter && job.contract_type !== contractFilter) {
+                    return false;
+                }
+
+                // Seniority filter
+                if (seniorityFilter && job.seniority !== seniorityFilter) {
+                    return false;
+                }
+
+                // Date filters
+                if (dateFrom && job.posted_date < dateFrom) {
+                    return false;
+                }
+                if (dateTo && job.posted_date > dateTo) {
+                    return false;
+                }
+
+                // Remote only filter
+                if (remoteOnly && job.work_mode !== 'Remote') {
+                    return false;
+                }
+
+                return true;
+            });
+
+            renderJobs();
+            saveFiltersToStorage();
+        }
+
+        // Rendering Functions
+        function renderJobs() {
+            renderJobsTable();
+            renderJobsCards();
+        }
+
+        function renderJobsTable() {
+            const tbody = document.getElementById('jobsTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredJobs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><h3>No jobs found</h3><p>Try adjusting your filters or add some job data</p></td></tr>';
+                return;
+            }
+
+            filteredJobs.forEach(job => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="job-checkbox checkbox" data-job-id="${job.id}" onchange="updateSelection()"></td>
+                    <td><button class="star-btn ${job.starred ? 'starred' : ''}" onclick="toggleStar('${job.id}')">${job.starred ? '⭐' : '☆'}</button></td>
+                    <td><strong>${job.company}</strong></td>
+                    <td>${job.title}</td>
+                    <td>${job.location}</td>
+                    <td><span class="job-tag ${job.track.toLowerCase()}">${job.track}</span></td>
+                    <td><span class="job-tag ${job.work_mode === 'Remote' ? 'remote' : ''}">${job.work_mode}</span></td>
+                    <td>${job.contract_type}</td>
+                    <td>${job.seniority}</td>
+                    <td>${formatDate(job.posted_date)}</td>
+                    <td>
+                        <button class="btn" onclick="openCoverLetterModal('${job.id}')" title="Cover Letter">📝</button>
+                        <button class="btn" onclick="openNotesModal('${job.id}')" title="Notes">📋</button>
+                        <a href="${job.apply_url}" target="_blank" class="btn" title="Apply">🔗</a>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            updateSelectionCheckboxes();
+        }
+
+        function renderJobsCards() {
+            const container = document.getElementById('jobsCards');
+            container.innerHTML = '';
+
+            if (filteredJobs.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No jobs found</h3><p>Try adjusting your filters or add some job data</p></div>';
+                return;
+            }
+
+            filteredJobs.forEach(job => {
+                const card = document.createElement('div');
+                card.className = 'job-card';
+                card.innerHTML = `
+                    <div class="job-card-header">
+                        <div>
+                            <div class="job-title">${job.title}</div>
+                            <div class="job-company">${job.company}</div>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="job-checkbox checkbox" data-job-id="${job.id}" onchange="updateSelection()">
+                            <button class="star-btn ${job.starred ? 'starred' : ''}" onclick="toggleStar('${job.id}')">${job.starred ? '⭐' : '☆'}</button>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="job-tag">${job.location}</span>
+                        <span class="job-tag ${job.track.toLowerCase()}">${job.track}</span>
+                        <span class="job-tag ${job.work_mode === 'Remote' ? 'remote' : ''}">${job.work_mode}</span>
+                        <span class="job-tag">${job.contract_type}</span>
+                        <span class="job-tag">${job.seniority}</span>
+                        <span class="job-tag">${formatDate(job.posted_date)}</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" onclick="openCoverLetterModal('${job.id}')">📝 Cover Letter</button>
+                        <button class="btn" onclick="openNotesModal('${job.id}')">📋 Notes</button>
+                        <a href="${job.apply_url}" target="_blank" class="btn">🔗 Apply</a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            updateSelectionCheckboxes();
+        }
+
+        // Job Management Functions
+        function toggleStar(jobId) {
+            const job = jobs.find(j => j.id === jobId);
+            if (job) {
+                job.starred = !job.starred;
+                saveToLocalStorage();
+                renderJobs();
+                updateStats();
+            }
+        }
+
+        function openCoverLetterModal(jobId) {
+            const job = jobs.find(j => j.id === jobId);
+            if (!job) return;
+
+            const modal = document.getElementById('coverLetterModal');
+            const content = document.getElementById('coverLetterContent');
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #4c51bf; margin-bottom: 10px;">${job.title} at ${job.company}</h3>
+                    <p style="color: #6b7280; margin-bottom: 20px;">${job.location} • ${job.work_mode} • ${job.contract_type}</p>
+                </div>
+                
+                <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px;">📋 Personalized Application Guidance</h4>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>🎯 Key Highlights for Omar:</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Emphasize legal technology expertise and commercial awareness</li>
+                            <li>Highlight experience with contract negotiations and regulatory compliance</li>
+                            <li>Showcase analytical skills and attention to detail</li>
+                            ${job.track === 'Legal' ? '<li>Reference qualification and PQE relevant to role level</li>' : '<li>Emphasize flexible working approach and project-based experience</li>'}
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>💡 Cover Letter Structure:</strong>
+                        <ol style="margin: 10px 0; padding-left: 20px;">
+                            <li><strong>Opening:</strong> Express genuine interest in ${job.company} and this specific role</li>
+                            <li><strong>Body:</strong> Match experience to job requirements, focus on ${job.track.toLowerCase()} track expertise</li>
+                            <li><strong>Value Proposition:</strong> Highlight unique skills that set Omar apart</li>
+                            <li><strong>Closing:</strong> Professional conclusion with call to action</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>🔍 Research Points:</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Recent news or developments at ${job.company}</li>
+                            <li>Company culture and values alignment</li>
+                            <li>Specific projects or practice areas of interest</li>
+                            <li>Industry trends relevant to the role</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #4c51bf;">
+                        <strong>💼 Salary Context:</strong> ${job.salary_range || 'Salary not specified - research market rates for this level'}
+                    </div>
+                </div>
+                
+                <div style="padding: 15px; background: #eff6ff; border-radius: 8px;">
+                    <p style="margin: 0; color: #1e40af;"><strong>💡 Pro Tip:</strong> Tailor each application specifically to this role. Generic applications are easily spotted and less effective.</p>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeCoverLetterModal() {
+            document.getElementById('coverLetterModal').style.display = 'none';
+        }
+
+        function openNotesModal(jobId) {
+            currentJobForNotes = jobId;
+            const job = jobs.find(j => j.id === jobId);
+            if (!job) return;
+
+            document.getElementById('notesTextarea').value = job.notes || '';
+            document.getElementById('notesModal').style.display = 'block';
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').style.display = 'none';
+            currentJobForNotes = null;
+        }
+
+        function saveNotes() {
+            if (!currentJobForNotes) return;
+
+            const job = jobs.find(j => j.id === currentJobForNotes);
+            if (job) {
+                job.notes = document.getElementById('notesTextarea').value;
+                saveToLocalStorage();
+                closeNotesModal();
+            }
+        }
+
+        // Selection and Bulk Operations
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.job-checkbox');
+            selectedJobs.clear();
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedJobs.add(checkbox.dataset.jobId);
+                }
+            });
+
+            updateSelectAllCheckbox();
+        }
+
+        function updateSelectionCheckboxes() {
+            const checkboxes = document.querySelectorAll('.job-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectedJobs.has(checkbox.dataset.jobId);
+            });
+            updateSelectAllCheckbox();
+        }
+
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const visibleJobs = filteredJobs.length;
+            const selectedVisibleJobs = filteredJobs.filter(job => selectedJobs.has(job.id)).length;
+            
+            selectAllCheckbox.checked = visibleJobs > 0 && selectedVisibleJobs === visibleJobs;
+            selectAllCheckbox.indeterminate = selectedVisibleJobs > 0 && selectedVisibleJobs < visibleJobs;
+        }
+
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            
+            if (selectAllCheckbox.checked) {
+                filteredJobs.forEach(job => selectedJobs.add(job.id));
+            } else {
+                filteredJobs.forEach(job => selectedJobs.delete(job.id));
+            }
+            
+            updateSelectionCheckboxes();
+        }
+
+        function selectAll() {
+            filteredJobs.forEach(job => selectedJobs.add(job.id));
+            updateSelectionCheckboxes();
+        }
+
+        function clearSelection() {
+            selectedJobs.clear();
+            updateSelectionCheckboxes();
+        }
+
+        function toggleBulkActions() {
+            const bulkActions = document.getElementById('bulkActions');
+            bulkActions.classList.toggle('show');
+        }
+
+        function bulkStar() {
+            selectedJobs.forEach(jobId => {
+                const job = jobs.find(j => j.id === jobId);
+                if (job) job.starred = true;
+            });
+            saveToLocalStorage();
+            renderJobs();
+            updateStats();
+        }
+
+        function bulkUnstar() {
+            selectedJobs.forEach(jobId => {
+                const job = jobs.find(j => j.id === jobId);
+                if (job) job.starred = false;
+            });
+            saveToLocalStorage();
+            renderJobs();
+            updateStats();
+        }
+
+        // Export Functions
+        function exportToCSV() {
+            const csv = convertToCSV(filteredJobs);
+            downloadFile(csv, 'omars_job_radar_export.csv', 'text/csv');
+        }
+
+        function exportToJSON() {
+            const json = JSON.stringify(filteredJobs, null, 2);
+            downloadFile(json, 'omars_job_radar_export.json', 'application/json');
+        }
+
+        function bulkExportCSV() {
+            const selectedJobsData = jobs.filter(job => selectedJobs.has(job.id));
+            const csv = convertToCSV(selectedJobsData);
+            downloadFile(csv, 'omars_job_radar_selected.csv', 'text/csv');
+        }
+
+        function bulkExportJSON() {
+            const selectedJobsData = jobs.filter(job => selectedJobs.has(job.id));
+            const json = JSON.stringify(selectedJobsData, null, 2);
+            downloadFile(json, 'omars_job_radar_selected.json', 'application/json');
+        }
+
+        function convertToCSV(data) {
+            if (data.length === 0) return '';
+            
+            const headers = ['ID', 'Company', 'Title', 'Location', 'Track', 'Work Mode', 'Contract Type', 'Seniority', 'Posted Date', 'Apply URL', 'Salary Range', 'Starred', 'Notes'];
+            const csvRows = [headers.join(',')];
+            
+            data.forEach(job => {
+                const row = [
+                    job.id,
+                    `"${job.company}"`,
+                    `"${job.title}"`,
+                    `"${job.location}"`,
+                    job.track,
+                    job.work_mode,
+                    job.contract_type,
+                    job.seniority,
+                    job.posted_date,
+                    job.apply_url,
+                    `"${job.salary_range || ''}"`,
+                    job.starred,
+                    `"${(job.notes || '').replace(/"/g, '""')}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+            
+            return csvRows.join('\n');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // State Management
+        function saveToLocalStorage() {
+            localStorage.setItem('omars_job_radar_jobs', JSON.stringify(jobs));
+        }
+
+        function saveFiltersToStorage() {
+            const filters = {
+                search: document.getElementById('searchInput').value,
+                track: document.getElementById('trackFilter').value,
+                workMode: document.getElementById('workModeFilter').value,
+                contract: document.getElementById('contractFilter').value,
+                seniority: document.getElementById('seniorityFilter').value,
+                dateFrom: document.getElementById('dateFromFilter').value,
+                dateTo: document.getElementById('dateToFilter').value,
+                remoteOnly: document.getElementById('remoteOnlyFilter').checked
+            };
+            localStorage.setItem('omars_job_radar_filters', JSON.stringify(filters));
+        }
+
+        function loadFiltersFromStorage() {
+            const savedFilters = localStorage.getItem('omars_job_radar_filters');
+            if (savedFilters) {
+                const filters = JSON.parse(savedFilters);
+                document.getElementById('searchInput').value = filters.search || '';
+                document.getElementById('trackFilter').value = filters.track || '';
+                document.getElementById('workModeFilter').value = filters.workMode || '';
+                document.getElementById('contractFilter').value = filters.contract || '';
+                document.getElementById('seniorityFilter').value = filters.seniority || '';
+                document.getElementById('dateFromFilter').value = filters.dateFrom || '';
+                document.getElementById('dateToFilter').value = filters.dateTo || '';
+                document.getElementById('remoteOnlyFilter').checked = filters.remoteOnly || false;
+            }
+        }
+
+        function saveState() {
+            const state = {
+                jobs: jobs,
+                timestamp: new Date().toISOString()
+            };
+            const json = JSON.stringify(state, null, 2);
+            downloadFile(json, 'omars_job_radar_state.json', 'application/json');
+        }
+
+        function loadState() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const state = JSON.parse(e.target.result);
+                        if (state.jobs && Array.isArray(state.jobs)) {
+                            jobs = state.jobs;
+                            saveToLocalStorage();
+                            applyFilters();
+                            updateStats();
+                            alert('State loaded successfully!');
+                        } else {
+                            alert('Invalid state file format');
+                        }
+                    } catch (error) {
+                        alert('Error loading state: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Utility Functions
+        function updateStats() {
+            document.getElementById('totalJobsCount').textContent = jobs.length;
+            document.getElementById('starredJobsCount').textContent = jobs.filter(j => j.starred).length;
+            document.getElementById('legalJobsCount').textContent = jobs.filter(j => j.track === 'Legal').length;
+            document.getElementById('gigsJobsCount').textContent = jobs.filter(j => j.track === 'Gigs').length;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        }
+
+        function parseCSV(csvText) {
+            // Basic CSV parsing - in production, use a proper CSV parser
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                    const job = {};
+                    headers.forEach((header, index) => {
+                        job[header.toLowerCase().replace(/\s+/g, '_')] = values[index] || '';
+                    });
+                    result.push(job);
+                }
+            }
+            return result;
+        }
+
+        // Modal event handlers
+        window.onclick = function(event) {
+            const coverLetterModal = document.getElementById('coverLetterModal');
+            const notesModal = document.getElementById('notesModal');
+            
+            if (event.target === coverLetterModal) {
+                closeCoverLetterModal();
+            }
+            if (event.target === notesModal) {
+                closeNotesModal();
+            }
+        };
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
