@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    # Lints the codebase with Ruff to enforce style and catch simple bugs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff
+        run: ruff .
+
+  typecheck:
+    # Performs static type checking across the project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install mypy and dependencies
+        run: |
+          pip install mypy
+          pip install -r requirements.txt
+      - name: Run mypy
+        run: mypy .
+
+  deadcode:
+    # Detects unused code and fails if ≥5% of the codebase is dead
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install vulture
+        run: pip install vulture
+      - name: Run vulture and enforce dead code threshold
+        run: |
+          vulture . --json > vulture.json || true
+          python - <<'PY'
+import json, subprocess, sys
+from pathlib import Path
+with open("vulture.json") as fh:
+    issues=json.load(fh)
+dead=sum(item.get("size",1) for item in issues)
+total=sum(int(subprocess.run(["wc","-l",str(p)], capture_output=True, text=True).stdout.split()[0])
+          for p in Path(".").rglob("*.py"))
+pct=(dead/total*100) if total else 0
+print(f"Dead code percentage: {pct:.2f}%")
+sys.exit(1 if pct >= 5 else 0)
+PY
+
+  test:
+    # Executes the project's test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run tests
+        run: pytest
