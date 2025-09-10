@@ -1,6 +1,18 @@
 # job-O-matic-
 we gonna get this bread
 
+## 🎯 Live Application: Omar's Job Radar
+
+**🌐 [Access the live Job Radar application here](https://letter-orgz.github.io/job-O-matic-)** *(Available once GitHub Pages is configured)*
+
+The Job Radar is a comprehensive job search and application management tool that runs entirely in your browser. Features include:
+- 📊 Job data import (JSON, file upload, GitHub, Perplexity search)
+- 🔍 Advanced filtering and search capabilities  
+- 📈 Job statistics and tracking
+- 📋 Application management with notes and cover letters
+- 📥 Export functionality (CSV, JSON)
+- 💾 Save/load application state
+
 ## ⚠️ Important: Codespace Billing Notice
 
 **🚨 Current Issue: User v4mpire77 is being charged personally instead of organization billing.**
